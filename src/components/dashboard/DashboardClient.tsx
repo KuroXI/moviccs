@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { Coordinate, IOrder } from "@/types";
 import { toast } from "sonner";
 import { knapsack } from "@/functions/knapsack";
-import { Mapbox } from "../home/Mapbox";
+import { Mapbox } from "./Mapbox";
 
 type DashboardClientProps = {
   orders: IOrder[];
