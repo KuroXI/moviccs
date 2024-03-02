@@ -1,0 +1,50 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  pull-requests: write
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.10.0
+
+      - name: Set up Pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Install Node.js dependencies
+        run: pnpm install
+
+      - name: Run linters
+        id: linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          continue_on_error: false
+
+      - name: Comment on success
+        if: ${{ success() }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "Great news! The linters didn't find any issues with your code. Keep up the good work!"
+          pr_number: ${{ github.event.pull_request.number }}
+
+      - name: Comment on failure
+        if: ${{ failure() }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following command in your local environment:\n\n```\npnpm lint\n```\n\nThis command will help identify formatting problems. Once you've fixed the lint problems, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
+          pr_number: ${{ github.event.pull_request.number }}
