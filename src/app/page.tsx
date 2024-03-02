@@ -1,11 +1,11 @@
+import { HomeClient } from "@/components/home/HomeClient";
+import { api } from "@/trpc/server";
 import { unstable_noStore as noStore } from "next/cache";
 
 export default async function Home() {
   noStore();
 
-  return (
-    <main className="">
-      
-    </main>
-  );
+  const orders = await api.order.get.query();
+
+  return <HomeClient orders={orders} />;
 }

@@ -1,16 +1,15 @@
 export type Order = {
-  name: string;
+  address: string;
   distance: number;
   coordinates: [latitude: number, longitude: number];
-  geojson: GeoJSON;
-  item: Item;
+  item: Item[];
 };
 
 export type Item = {
-  name: string;
+  item: string;
   price: number;
   weight: number;
-  quantity: number;
+  amount: number;
 };
 
 export type Coordinate = {
@@ -18,6 +17,27 @@ export type Coordinate = {
   longitude: number;
 };
 
-export type GeoJSON = {
-  coordinates: number[][];
+export interface GeoJSON extends Order {
+  geojson: {
+    coordinates: number[][];
+  };
+}
+
+export type GeoLocation = {
+  features: [
+    {
+      place_name: string;
+    },
+  ];
+};
+
+export type Location = {
+  routes: [
+    {
+      distance: number;
+      geometry: {
+        coordinates: number[][];
+      };
+    },
+  ];
 };

@@ -10,6 +10,7 @@ generator client {
 model Order {
   id          String  @id @default(cuid())
   address     String
+  distance    Float
   status      String  @default("order_placed")
   coordinates Float[] // [longitude, latitude]
   items       Item[]
