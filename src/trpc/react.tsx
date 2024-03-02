@@ -8,6 +8,7 @@ import { useState } from "react";
 import { type AppRouter } from "@/server/api/root";
 import { getUrl, transformer } from "./shared";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const createQueryClient = () => new QueryClient();
 
@@ -46,6 +47,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
       <api.Provider client={trpcClient} queryClient={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
           {props.children}
+          <Toaster />
         </ThemeProvider>
       </api.Provider>
     </QueryClientProvider>
