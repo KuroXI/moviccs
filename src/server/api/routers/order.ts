@@ -1,44 +1,28 @@
 import { z } from "zod";
 import { generateCoordinates } from "@/functions/generateCoordinates";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
-import { type Coordinate, type GeoLocation, type Location } from "@/types";
-import { mapboxInstance } from "@/lib/axios";
+import { type Coordinate } from "@/types";
 import { generateItems } from "@/functions/generateItems";
+import { getDistance } from "@/functions/getDistance";
+import { getLocation } from "@/functions/getLocation";
 
 export const orderRouter = createTRPCRouter({
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({ count: z.number(), location: z.custom<Coordinate>() }))
     .mutation(async ({ ctx, input }) => {
-      // if (ctx.session.user.role !== "ADMIN") {
-      //   throw new Error("You are not authorized to perform this action");
-      // }
+      if (ctx.session.user.role !== "ADMIN") {
+        throw new Error("You are not authorized to perform this action");
+      }
 
       const coordinates = await generateCoordinates({ count: input.count, location: input.location });
-
       for (const { latitude, longitude } of coordinates) {
-        const { data: geoLocation }: { data: GeoLocation } = await mapboxInstance.get(
-          `/geocoding/v5/mapbox.places/${longitude},${latitude}.json`,
-        );
-
-        const currentLocation = `${input.location.longitude},${input.location.latitude}`;
-        const targetLocation = `${longitude},${latitude}`;
-        const { data: distance }: { data: Location } = await mapboxInstance.get(
-          `/directions/v5/mapbox/driving/${currentLocation};${targetLocation}`,
-          {
-            params: {
-              alternatives: false,
-              overview: "full",
-              geometries: "geojson",
-              steps: false,
-              notifications: "none",
-            },
-          },
-        );
+        const { address } = await getLocation(latitude, longitude);
+        const { distance } = await getDistance(input.location, { latitude, longitude });
 
         const createOrder = await ctx.db.order.create({
           data: {
-            address: geoLocation.features[0].place_name,
-            distance: distance.routes[0].distance,
+            address,
+            distance,
             coordinates: [latitude, longitude],
           },
         });
