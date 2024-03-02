@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { generateCoordinates } from "@/functions/generateCoordinates";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import type { Coordinate } from "@/types";
-import { getGeoLocation } from "@/functions/getGeoLocation";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
+import { type Coordinate, type GeoLocation, type Location } from "@/types";
+import { mapboxInstance } from "@/lib/axios";
+import { generateItems } from "@/functions/generateItems";
 
 export const orderRouter = createTRPCRouter({
   create: publicProcedure
@@ -13,36 +14,53 @@ export const orderRouter = createTRPCRouter({
       // }
 
       const coordinates = await generateCoordinates({ count: input.count, location: input.location });
-      const orders = await getGeoLocation({ coordinates, location: input.location });
 
-      await Promise.all(
-        orders.map(async (order) => {
-          const createOrder = await ctx.db.order.create({
-            data: {
-              address: order.address,
-              distance: order.distance,
-              coordinates: order.coordinates,
+      for (const { latitude, longitude } of coordinates) {
+        const { data: geoLocation }: { data: GeoLocation } = await mapboxInstance.get(
+          `/geocoding/v5/mapbox.places/${longitude},${latitude}.json`,
+        );
+
+        const currentLocation = `${input.location.longitude},${input.location.latitude}`;
+        const targetLocation = `${longitude},${latitude}`;
+        const { data: distance }: { data: Location } = await mapboxInstance.get(
+          `/directions/v5/mapbox/driving/${currentLocation};${targetLocation}`,
+          {
+            params: {
+              alternatives: false,
+              overview: "full",
+              geometries: "geojson",
+              steps: false,
+              notifications: "none",
             },
-          });
+          },
+        );
 
-          const itemData = order.item.map((item) => ({
-            item: item.item,
-            price: item.price,
-            weight: item.weight,
-            amount: item.amount,
-            orderById: createOrder.id,
-          }));
+        const createOrder = await ctx.db.order.create({
+          data: {
+            address: geoLocation.features[0].place_name,
+            distance: distance.routes[0].distance,
+            coordinates: [latitude, longitude],
+          },
+        });
 
-          await ctx.db.item.createMany({ data: itemData });
-        }),
-      );
+        const itemData = generateItems({ count: 5, orderById: createOrder.id });
+        await ctx.db.item.createMany({ data: itemData });
+      }
     }),
 
   get: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.order.findMany({
-      where: {
-        status: "order_placed",
+      select: {
+        id: true,
+        address: true,
+        status: true,
+        distance: true,
+        coordinates: true,
+        items: true,
       },
+      where: {
+        status: "PLACED",
+      }
     });
   }),
 });
