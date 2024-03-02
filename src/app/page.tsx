@@ -1,11 +1,13 @@
 import { HomeClient } from "@/components/home/HomeClient";
-import { api } from "@/trpc/server";
-import { unstable_noStore as noStore } from "next/cache";
+import { getServerAuthSession } from "@/server/auth";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
-  noStore();
+  const session = await getServerAuthSession();
 
-  const orders = await api.order.get.query();
+  if (session) {
+    return redirect("/dashboard");
+  }
 
-  return <HomeClient orders={orders} />;
+  return <HomeClient />;
 }
