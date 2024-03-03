@@ -6,7 +6,7 @@ type GenerateCoordinatesInput = {
   location: Coordinate;
 };
 
-export const generateCoordinates = async ({ count, location }: GenerateCoordinatesInput) => {
+export const generateCoordinates = ({ count, location }: GenerateCoordinatesInput) => {
   const generateCoordinate = (): Coordinate => {
     const [latitude, longitude] = faker.location.nearbyGPSCoordinate({
       origin: [location.latitude, location.longitude],

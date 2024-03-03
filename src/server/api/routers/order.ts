@@ -14,22 +14,31 @@ export const orderRouter = createTRPCRouter({
         throw new Error("You are not authorized to perform this action");
       }
 
-      const coordinates = await generateCoordinates({ count: input.count, location: input.location });
-      for (const { latitude, longitude } of coordinates) {
-        const { address } = await getLocation(latitude, longitude);
-        const { distance } = await getDistance(input.location, { latitude, longitude });
+      const coordinates = generateCoordinates({ count: input.count, location: input.location });
 
-        const createOrder = await ctx.db.order.create({
-          data: {
-            address,
-            distance,
-            coordinates: [latitude, longitude],
-          },
-        });
+      Promise.all(coordinates)
+        .then(async (coordinates) => {
+          for (const { latitude, longitude } of coordinates) {
+            const { address } = await getLocation(latitude, longitude);
+            const { distance } = await getDistance(input.location, { latitude, longitude });
 
-        const itemData = generateItems({ count: 5, orderById: createOrder.id });
-        await ctx.db.item.createMany({ data: itemData });
-      }
+            const createOrder = await ctx.db.order.create({
+              data: {
+                address,
+                distance,
+                coordinates: [latitude, longitude],
+              },
+            });
+
+            await ctx.db.item.createMany({
+              data: generateItems({
+                count: Math.floor(Math.random() * 5) + 1,
+                orderById: createOrder.id,
+              }),
+            });
+          }
+        })
+        .catch((error) => console.log(error));
     }),
 
   get: publicProcedure.query(async ({ ctx }) => {
@@ -44,7 +53,7 @@ export const orderRouter = createTRPCRouter({
       },
       where: {
         status: "PLACED",
-      }
+      },
     });
   }),
 });

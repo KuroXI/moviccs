@@ -1,18 +1,21 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import ReactMapGL, { Marker } from "react-map-gl";
-import { LocateFixed, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import type { Coordinate, IOrder } from "@/types";
 import { env } from "@/env";
+import { AvatarRider } from "./AvatarRider";
+import { type Session } from "next-auth";
 
 type MapboxProps = {
   className?: string;
   deliveries: IOrder[];
   location: Coordinate;
+  session: Session;
 };
 
-export const Mapbox = ({ className, deliveries, location }: Readonly<MapboxProps>) => {
+export const Mapbox = ({ className, deliveries, location, session }: MapboxProps) => {
   const { theme } = useTheme();
 
   return (
@@ -48,17 +51,13 @@ export const Mapbox = ({ className, deliveries, location }: Readonly<MapboxProps
           </Source>
         ) : null} */}
         <Marker latitude={location.latitude} longitude={location.longitude}>
-          <LocateFixed />
+          <AvatarRider session={session} />
         </Marker>
-        {deliveries.map(({ coordinates }) => {
-          console.log(coordinates);
-
-          return (
-            <Marker latitude={coordinates[0]!} longitude={coordinates[1]!} key={`${coordinates[0]}-${coordinates[1]}`}>
-              <MapPin style={{ color: "red" }} />
-            </Marker>
-          );
-        })}
+        {deliveries.map(({ coordinates }) => (
+          <Marker latitude={coordinates[0]!} longitude={coordinates[1]!} key={`${coordinates[0]}-${coordinates[1]}`}>
+            <MapPin style={{ color: "red" }} />
+          </Marker>
+        ))}
       </ReactMapGL>
     </div>
   );
