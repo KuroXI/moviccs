@@ -8,5 +8,5 @@ export default async function Home() {
   if (!session) return redirect("/");
 
   const orders = await api.order.get.query();
-  return <DashboardClient orders={orders} />;
+  return <DashboardClient orders={orders} session={session} />;
 }
