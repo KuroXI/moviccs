@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { generateCoordinates } from "@/functions/generateCoordinates";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { type Coordinate } from "@/types";
 import { generateItems } from "@/functions/generateItems";
 import { getDistance } from "@/functions/getDistance";
 import { getLocation } from "@/functions/getLocation";
+import { type DeliveryStatus } from "@prisma/client";
 
 export const orderRouter = createTRPCRouter({
   create: publicProcedure
@@ -37,7 +38,25 @@ export const orderRouter = createTRPCRouter({
         .catch((error) => console.log(error));
     }),
 
-  get: publicProcedure.query(async ({ ctx }) => {
+  getAvailableOrder: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.order.findMany({
+      select: {
+        id: true,
+        address: true,
+        status: true,
+        distance: true,
+        coordinates: true,
+        items: true,
+        handlerId: true,
+      },
+      where: {
+        status: "PLACED",
+        handlerId: null,
+      },
+    });
+  }),
+
+  getDeliveryOrder: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.order.findMany({
       select: {
         id: true,
@@ -48,8 +67,38 @@ export const orderRouter = createTRPCRouter({
         items: true,
       },
       where: {
-        status: "PLACED",
+        status: "CONFIRMED",
+        handlerId: ctx.session.user.id,
       },
     });
   }),
+
+  setDeliveryOrder: protectedProcedure
+    .input(z.object({ orderIds: z.string().array() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.order.updateMany({
+        data: {
+          status: "CONFIRMED",
+          handlerId: ctx.session.user.id,
+        },
+        where: {
+          id: {
+            in: input.orderIds,
+          },
+        },
+      });
+    }),
+
+  setDeliveryStatus: protectedProcedure
+    .input(z.object({ orderId: z.string(), status: z.custom<DeliveryStatus>() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.order.update({
+        data: {
+          status: input.status,
+        },
+        where: {
+          id: input.orderId,
+        },
+      });
+    }),
 });
