@@ -24,7 +24,7 @@ export const DashboardClient = ({ orders, session }: DashboardClientProps) => {
   });
   const [selectedRoute, setSelectedRoute] = useState<RouteDetails | null>(null);
 
-  const deliveries = api.delivery.get.useQuery();
+  const deliveries = api.order.getDeliveryOrder.useQuery();
 
   const orderMutation = api.order.create.useMutation();
   const generate = () => {
@@ -41,7 +41,7 @@ export const DashboardClient = ({ orders, session }: DashboardClientProps) => {
     );
   };
 
-  const deliveryMutation = api.delivery.create.useMutation();
+  const deliveryMutation = api.order.setDeliveryOrder.useMutation();
   const takeOrder = async () => {
     const order = knapsack({ maxWeight: 15, orders });
 

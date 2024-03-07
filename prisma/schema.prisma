@@ -14,6 +14,8 @@ model Order {
   status      DeliveryStatus @default(PLACED)
   coordinates Float[] // [longitude, latitude]
   items       Item[]
+  handler     User?          @relation(fields: [handlerId], references: [id])
+  handlerId   String?
 }
 
 model Item {
@@ -35,13 +37,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  deliveries    Deliver[]
-}
-
-model Deliver {
-  orderId      String @id
-  deliveryBy   User   @relation(fields: [deliveryById], references: [id], onDelete: Cascade)
-  deliveryById String
+  deliveries    Order[]
 }
 
 // Next Auth Tables
