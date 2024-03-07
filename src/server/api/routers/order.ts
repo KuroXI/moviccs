@@ -1,19 +1,15 @@
 import { z } from "zod";
 import { generateCoordinates } from "@/functions/generateCoordinates";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { type Coordinate } from "@/types";
 import { generateItems } from "@/functions/generateItems";
 import { getDistance } from "@/functions/getDistance";
 import { getLocation } from "@/functions/getLocation";
 
 export const orderRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: publicProcedure
     .input(z.object({ count: z.number(), location: z.custom<Coordinate>() }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.session.user.role !== "ADMIN") {
-        throw new Error("You are not authorized to perform this action");
-      }
-
       const coordinates = generateCoordinates({ count: input.count, location: input.location });
 
       Promise.all(coordinates)

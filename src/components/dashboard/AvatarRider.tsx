@@ -9,7 +9,7 @@ export const AvatarRider = ({ session }: AvatarRiderProps) => {
   return (
     <Avatar>
       <AvatarImage src={session.user.image!} alt={session.user.name!} />
-      <AvatarFallback>{session.user.name?.charAt(0).toUpperCase()} ?? R</AvatarFallback>
+      <AvatarFallback>{session.user.name?.charAt(0).toUpperCase() ?? "R"}</AvatarFallback>
     </Avatar>
   );
 };
