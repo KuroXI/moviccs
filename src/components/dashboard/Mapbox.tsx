@@ -1,21 +1,22 @@
 import "mapbox-gl/dist/mapbox-gl.css";
-import ReactMapGL, { Marker } from "react-map-gl";
-import { MapPin } from "lucide-react";
+import ReactMapGL, { Layer, Marker, Source } from "react-map-gl";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
-import type { Coordinate, IOrder } from "@/types";
+import type { Coordinate, RouteDetails } from "@/types";
 import { env } from "@/env";
 import { AvatarRider } from "./AvatarRider";
 import { type Session } from "next-auth";
+import { IconOrderLocation } from "../deliveries/IconOrderLocation";
+import { getColorByIndex } from "@/lib/colorIndex";
 
 type MapboxProps = {
   className?: string;
-  deliveries: IOrder[];
   location: Coordinate;
   session: Session;
+  route: RouteDetails | null;
 };
 
-export const Mapbox = ({ className, deliveries, location, session }: MapboxProps) => {
+export const Mapbox = ({ className, location, session, route }: MapboxProps) => {
   const { theme } = useTheme();
 
   return (
@@ -33,31 +34,43 @@ export const Mapbox = ({ className, deliveries, location, session }: MapboxProps
           zoom: 14.81,
         }}
       >
-        {/* {deliveries.length ? (
-          <Source
-            id="routeSource"
-            type="geojson"
-            data={{
-              coordinates: orders[0]!.geojson.coordinates,
-              type: "LineString",
-            }}
-          >
-            <Layer
-              id="roadLayer"
-              type="line"
-              layout={{ "line-join": "round", "line-cap": "round" }}
-              paint={{ "line-color": "blue", "line-width": 4, "line-opacity": 0.75 }}
-            />
-          </Source>
-        ) : null} */}
+        {route?.orderRoute.length
+          ? route.orderRoute.map((order, index) => (
+              <Source
+                key={`${order.destinationId}-source-${index}`}
+                id={`${order.destinationId}-source-${index}`}
+                type="geojson"
+                data={{
+                  coordinates: order.routeDescription.route,
+                  type: "LineString",
+                }}
+              >
+                <Layer
+                  id={`${order.destinationId}-layer-${index}`}
+                  type="line"
+                  layout={{ "line-join": "round", "line-cap": "round" }}
+                  paint={{ "line-color": getColorByIndex(index), "line-width": 4, "line-opacity": 1 }}
+                />
+              </Source>
+            ))
+          : null}
+        {route?.orderRoute.length
+          ? route.orderRoute.map(
+              ({ order, destinationId }, index) =>
+                order !== null && (
+                  <Marker
+                    key={`${destinationId}-marker-${index}`}
+                    latitude={order.coordinates[0]!}
+                    longitude={order.coordinates[1]!}
+                  >
+                    <IconOrderLocation number={index + 1} />
+                  </Marker>
+                ),
+            )
+          : null}
         <Marker latitude={location.latitude} longitude={location.longitude}>
           <AvatarRider session={session} />
         </Marker>
-        {deliveries.map(({ coordinates }) => (
-          <Marker latitude={coordinates[0]!} longitude={coordinates[1]!} key={`${coordinates[0]}-${coordinates[1]}`}>
-            <MapPin style={{ color: "red" }} />
-          </Marker>
-        ))}
       </ReactMapGL>
     </div>
   );

@@ -3,12 +3,14 @@
 import { api } from "@/trpc/react";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import type { Coordinate, IOrder } from "@/types";
+import type { Coordinate, IOrder, RouteDetails } from "@/types";
 import { toast } from "sonner";
 import { knapsack } from "@/functions/knapsack";
 import { Mapbox } from "./Mapbox";
 import type { Session } from "next-auth";
 import { DeliveriesTable } from "../deliveries/DeliveriesTable";
+import { PlacedOrder } from "./PlacedOrder";
+import { DeliveryPath } from "../deliveries/DeliveryPath";
 
 type DashboardClientProps = {
   orders: IOrder[];
@@ -16,10 +18,11 @@ type DashboardClientProps = {
 };
 
 export const DashboardClient = ({ orders, session }: DashboardClientProps) => {
-  const [location] = useState<Coordinate>({
+  const [location, setLocation] = useState<Coordinate>({
     latitude: 14.662039,
     longitude: 121.058082,
   });
+  const [selectedRoute, setSelectedRoute] = useState<RouteDetails | null>(null);
 
   const deliveries = api.delivery.get.useQuery();
 
@@ -58,22 +61,52 @@ export const DashboardClient = ({ orders, session }: DashboardClientProps) => {
     );
   };
 
+  const simulateDelivery = async () => {
+    for (const order of selectedRoute!.orderRoute) {
+      for (const route of order.routeDescription.route) {
+        setLocation({
+          latitude: route[1]!,
+          longitude: route[0]!,
+        });
+
+        /**
+         * 800 - More realistic simulation
+         * 200  - Faster simulation (for presentation purposes)
+         * 100  - Fastest simulation (for testing purposes)
+         */
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+  };
+
   return (
     <main className="grid h-screen w-screen grid-cols-2 p-5">
       <div className="col-span-1 flex flex-col gap-5 p-3">
         <div className="flex items-center justify-between">
           <Button onClick={generate}>Generate Order</Button>
-          <Button onClick={takeOrder} disabled={!!deliveries.data?.length}>Take Order</Button>
+          <PlacedOrder orders={orders} />
+          <Button onClick={takeOrder} disabled={!!deliveries.data?.length}>
+            Take Order
+          </Button>
+          <DeliveryPath
+            location={location}
+            deliveries={deliveries.data as IOrder[]}
+            session={session}
+            setSelectRoute={setSelectedRoute}
+          />
+          <Button onClick={simulateDelivery} disabled={selectedRoute === null}>
+            Simulate Delivery
+          </Button>
         </div>
 
-        {deliveries.data ? <DeliveriesTable deliveries={deliveries.data as IOrder[]} /> : null}
+        {selectedRoute !== null ? <DeliveriesTable route={selectedRoute} /> : null}
       </div>
       {deliveries.data ? (
         <Mapbox
-          deliveries={deliveries.data as IOrder[]}
           location={location}
           session={session}
-          className="z-50 col-span-1 h-full w-full"
+          className="z-50 col-span-1 h-full w-full rounded-full"
+          route={selectedRoute}
         />
       ) : null}
     </main>

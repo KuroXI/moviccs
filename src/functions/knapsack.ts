@@ -13,9 +13,6 @@ type KnapsackInput = {
  * Item B has 50 value and 5 weight (ratio = 10 value/weight)
  *
  * Even though Item A has higher absolute value, Item B gives us more value per unit of weight.
- *
- * TODO: Consider the distance of the order from the current location
- * ? What has the highest value per unit of weight and is closest to the current location?
  */
 export const knapsack = ({ maxWeight, orders }: KnapsackInput): IOrder[] => {
   orders.sort((a, b) => {

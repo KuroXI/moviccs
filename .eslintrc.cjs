@@ -30,8 +30,6 @@ const config = {
         checksVoidReturn: { attributes: false },
       },
     ],
-
-    "indent": ["error", 2]
   },
 };
 

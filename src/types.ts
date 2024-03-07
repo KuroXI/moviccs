@@ -33,3 +33,17 @@ export type Location = {
     },
   ];
 };
+
+export type OrderRoute = {
+  destinationId: string;
+  order: IOrder | null;
+  routeDescription: {
+    distance: number;
+    route: number[][];
+  };
+};
+
+export type RouteDetails = {
+  orderRoute: OrderRoute[];
+  routeDistance: number;
+};
