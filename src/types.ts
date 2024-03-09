@@ -1,7 +1,8 @@
-import type { Item, Order } from "@prisma/client";
+import type { Item, Order, User } from "@prisma/client";
 
 export interface IOrder extends Order {
   items: Item[];
+  handler: User | null;
 }
 
 export type Coordinate = {
@@ -46,4 +47,12 @@ export type OrderRoute = {
 export type RouteDetails = {
   orderRoute: OrderRoute[];
   routeDistance: number;
+};
+
+export type ImageResponse = {
+  results: {
+    urls: {
+      thumb: string;
+    };
+  }[];
 };

@@ -1,9 +1,8 @@
 import { type RouteDetails } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { ChevronDown } from "lucide-react";
-import { Button } from "../ui/button";
 import { formatMeter } from "@/lib/formatMeter";
+import { OrderDialog } from "./OrderDialog";
 
 type DeliveriesTableProps = {
   route: RouteDetails;
@@ -33,9 +32,7 @@ export const DeliveriesTable = ({ route }: DeliveriesTableProps) => {
                   <Badge>{order.order!.status}</Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon">
-                    <ChevronDown size={20} />
-                  </Button>
+                  <OrderDialog order={order.order!} />
                 </TableCell>
               </TableRow>
             ))}

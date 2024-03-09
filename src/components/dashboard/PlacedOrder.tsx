@@ -25,6 +25,7 @@ export const PlacedOrder = ({ orders }: PlacedOrderProps) => {
                 <TableHead>Address</TableHead>
                 <TableHead>Distance</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Total Weight</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -33,6 +34,7 @@ export const PlacedOrder = ({ orders }: PlacedOrderProps) => {
                   <TableCell className="truncate">{order.address}</TableCell>
                   <TableCell>{order.distance}</TableCell>
                   <TableCell>{order.items.reduce((acc, item) => (acc += item.price), 0)}</TableCell>
+                  <TableCell>{order.items.reduce((acc, item) => (acc += item.weight * item.amount), 0)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

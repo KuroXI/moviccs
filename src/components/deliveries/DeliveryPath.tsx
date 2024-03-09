@@ -9,6 +9,7 @@ import { generateDeliveryRoute } from "@/functions/generateDeliveryRoute";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { type Session } from "next-auth";
 import { formatMeter } from "@/lib/formatMeter";
+import { ScrollArea } from "../ui/scroll-area";
 
 type DeliveryPathProps = {
   location: Coordinate;
@@ -34,29 +35,24 @@ export const DeliveryPath = ({ location, deliveries, session, setSelectRoute }: 
         </Button>
       </DialogTrigger>
       <DialogContent className="grid h-3/4 max-h-fit max-w-7xl grid-cols-3 gap-3">
-        <div className="col-span-1 flex flex-col items-end justify-between">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Path</TableHead>
-                <TableHead className="text-end">Total Distance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {routes.map((route, index) => (
-                <TableRow key={route.routeDistance} onClick={() => setSelectedRoute(route)}>
-                  <TableHead>Path {index}</TableHead>
-                  <TableHead className="text-end">{formatMeter(route.routeDistance)}</TableHead>
+        <ScrollArea className="col-span-1 flex flex-col items-end justify-between">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Path</TableHead>
+                  <TableHead className="text-end">Total Distance</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <DialogClose asChild>
-            <Button disabled={selectedRoute === null} onClick={() => setSelectRoute(selectedRoute)}>
-              Accept
-            </Button>
-          </DialogClose>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {routes.map((route, index) => (
+                  <TableRow key={route.routeDistance} onClick={() => setSelectedRoute(route)}>
+                    <TableHead>Path {index}</TableHead>
+                    <TableHead className="text-end">{formatMeter(route.routeDistance)}</TableHead>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+        </ScrollArea>
 
         <Mapbox
           className="z-50 col-span-2 h-full w-full p-5"
@@ -64,6 +60,11 @@ export const DeliveryPath = ({ location, deliveries, session, setSelectRoute }: 
           session={session}
           route={selectedRoute}
         />
+        <DialogClose asChild>
+          <Button disabled={selectedRoute === null} onClick={() => setSelectRoute(selectedRoute)}>
+            Accept
+          </Button>
+        </DialogClose>
       </DialogContent>
     </Dialog>
   );

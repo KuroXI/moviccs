@@ -9,22 +9,26 @@ generator client {
 
 model Order {
   id          String         @id @default(cuid())
+  orderId     Int            @default(autoincrement())
   address     String
   distance    Float
   status      DeliveryStatus @default(PLACED)
   coordinates Float[] // [longitude, latitude]
   items       Item[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   handler     User?          @relation(fields: [handlerId], references: [id])
   handlerId   String?
 }
 
 model Item {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   item      String
   amount    Int
   weight    Int
   price     Float
-  orderBy   Order  @relation(fields: [orderById], references: [id], onDelete: Cascade)
+  image     String
+  orderBy   Order   @relation(fields: [orderById], references: [id], onDelete: Cascade)
   orderById String
 }
 

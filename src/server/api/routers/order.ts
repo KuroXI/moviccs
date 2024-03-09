@@ -28,8 +28,8 @@ export const orderRouter = createTRPCRouter({
             });
 
             await ctx.db.item.createMany({
-              data: generateItems({
-                count: Math.floor(Math.random() * 5) + 1,
+              data: await generateItems({
+                count: Math.floor(Math.random() * 2) + 1,
                 orderById: createOrder.id,
               }),
             });
@@ -60,11 +60,22 @@ export const orderRouter = createTRPCRouter({
     return await ctx.db.order.findMany({
       select: {
         id: true,
+        orderId: true,
         address: true,
         status: true,
         distance: true,
         coordinates: true,
+        createdAt: true,
         items: true,
+        handlerId: true,
+        handler: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
       },
       where: {
         status: "CONFIRMED",
