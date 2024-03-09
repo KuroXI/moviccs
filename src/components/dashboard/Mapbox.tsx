@@ -22,7 +22,7 @@ export const Mapbox = ({ className, location, session, route }: MapboxProps) => 
   return (
     <div className={cn(className)}>
       <ReactMapGL
-        mapboxAccessToken={env.NEXT_PUBLIC_ACCESS_TOKEN}
+        mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
         mapStyle={
           theme === "dark"
             ? "mapbox://styles/kuroxi/clt326849009q01o8gkdy38ij"

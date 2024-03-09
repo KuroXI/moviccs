@@ -43,7 +43,7 @@ export const knapsack = ({ maxWeight, orders }: KnapsackInput): IOrder[] => {
   for (const order of orders) {
     if (totalWeight === maxWeight) break;
 
-    const itemTotalWeight = order.items.reduce((acc, item) => acc + item.weight, 0);
+    const itemTotalWeight = order.items.reduce((acc, item) => acc + (item.weight * item.amount), 0);
     if (itemTotalWeight + totalWeight <= maxWeight) {
       sack.push(order);
       totalWeight += itemTotalWeight;
