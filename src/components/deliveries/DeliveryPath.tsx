@@ -36,22 +36,22 @@ export const DeliveryPath = ({ location, deliveries, session, setSelectRoute }: 
       </DialogTrigger>
       <DialogContent className="grid h-3/4 max-h-fit max-w-7xl grid-cols-3 gap-3">
         <ScrollArea className="col-span-1 flex flex-col items-end justify-between">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Path</TableHead>
-                  <TableHead className="text-end">Total Distance</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Path</TableHead>
+                <TableHead className="text-end">Total Distance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {routes.map((route, index) => (
+                <TableRow key={route.routeDistance} onClick={() => setSelectedRoute(route)}>
+                  <TableHead>Path {index}</TableHead>
+                  <TableHead className="text-end">{formatMeter(route.routeDistance)}</TableHead>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {routes.map((route, index) => (
-                  <TableRow key={route.routeDistance} onClick={() => setSelectedRoute(route)}>
-                    <TableHead>Path {index}</TableHead>
-                    <TableHead className="text-end">{formatMeter(route.routeDistance)}</TableHead>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+              ))}
+            </TableBody>
+          </Table>
         </ScrollArea>
 
         <Mapbox

@@ -42,12 +42,16 @@ export const orderRouter = createTRPCRouter({
     return await ctx.db.order.findMany({
       select: {
         id: true,
+        orderId: true,
         address: true,
         status: true,
         distance: true,
         coordinates: true,
+        createdAt: true,
+        updatedAt: true,
         items: true,
         handlerId: true,
+        handler: true,
       },
       where: {
         status: "PLACED",
@@ -68,14 +72,7 @@ export const orderRouter = createTRPCRouter({
         createdAt: true,
         items: true,
         handlerId: true,
-        handler: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          },
-        },
+        handler: true,
       },
       where: {
         status: "CONFIRMED",

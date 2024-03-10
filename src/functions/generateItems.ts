@@ -19,7 +19,7 @@ export const generateItems = async ({ count, orderById }: GenerateItemsInput) =>
     const data = {
       item: faker.commerce.product(),
       price: parseInt(faker.commerce.price()),
-      weight: faker.number.int({ min: 1, max: 2 }),
+      weight: faker.number.int({ min: 1, max: 3 }),
       amount: faker.number.int({ min: 1, max: 2 }),
       orderById,
     };
