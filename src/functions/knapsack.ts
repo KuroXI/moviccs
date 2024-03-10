@@ -1,4 +1,5 @@
 import { type IOrder } from "@/types";
+import { getPriceWeightRatio } from "./getPriceWeightRatio";
 
 type KnapsackInput = {
   maxWeight: number;
@@ -15,27 +16,7 @@ type KnapsackInput = {
  * Even though Item A has higher absolute value, Item B gives us more value per unit of weight.
  */
 export const knapsack = ({ maxWeight, orders }: KnapsackInput): IOrder[] => {
-  orders.sort((a, b) => {
-    const itemA = a.items.reduce(
-      (acc, item) => {
-        acc.totalWeight += item.amount * item.weight;
-        acc.totalValue += item.amount * item.price;
-        return acc;
-      },
-      { totalWeight: 0, totalValue: 0 },
-    );
-
-    const itemB = b.items.reduce(
-      (acc, item) => {
-        acc.totalWeight += item.amount * item.weight;
-        acc.totalValue += item.amount * item.price;
-        return acc;
-      },
-      { totalWeight: 0, totalValue: 0 },
-    );
-
-    return itemB.totalValue / itemB.totalWeight - itemA.totalValue / itemA.totalWeight;
-  });
+  orders.sort((a, b) => getPriceWeightRatio(b.items) - getPriceWeightRatio(a.items));
 
   let totalWeight = 0;
   const sack = [];
@@ -43,7 +24,7 @@ export const knapsack = ({ maxWeight, orders }: KnapsackInput): IOrder[] => {
   for (const order of orders) {
     if (totalWeight === maxWeight) break;
 
-    const itemTotalWeight = order.items.reduce((acc, item) => acc + (item.weight * item.amount), 0);
+    const itemTotalWeight = order.items.reduce((acc, item) => acc + item.weight * item.amount, 0);
     if (itemTotalWeight + totalWeight <= maxWeight) {
       sack.push(order);
       totalWeight += itemTotalWeight;
