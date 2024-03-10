@@ -70,6 +70,7 @@ export const orderRouter = createTRPCRouter({
         distance: true,
         coordinates: true,
         createdAt: true,
+        updatedAt: true,
         items: true,
         handlerId: true,
         handler: true,
