@@ -14,6 +14,6 @@ export const imageSearchInstance = axios.create({
     client_id: env.NEXT_PUBLIC_UNSPLASH_ACCESS_TOKEN,
     page: 1,
     per_page: 1,
-    orientation: "landscape",
+    orientation: "portrait",
   },
 });

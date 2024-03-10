@@ -80,8 +80,16 @@ export const DashboardClient = ({ orders, session }: DashboardClientProps) => {
   };
 
   return (
-    <main className="grid h-screen w-screen grid-cols-2 p-5">
-      <div className="col-span-1 flex flex-col gap-5 p-3">
+    <main className="grid h-full w-full grid-rows-2 p-5">
+      {deliveries.data ? (
+        <Mapbox
+          location={location}
+          session={session}
+          className="z-10 row-span-1 h-full min-h-96 w-full rounded-full"
+          route={selectedRoute}
+        />
+      ) : null}
+      <div className="row-span-1 flex flex-col gap-5 p-3">
         <div className="flex items-center justify-between">
           <Button onClick={generate}>Generate Order</Button>
           <PlacedOrder orders={orders} />
@@ -99,16 +107,8 @@ export const DashboardClient = ({ orders, session }: DashboardClientProps) => {
           </Button>
         </div>
 
-        {selectedRoute !== null ? <DeliveriesTable route={selectedRoute} /> : null}
+        <DeliveriesTable route={selectedRoute} />
       </div>
-      {deliveries.data ? (
-        <Mapbox
-          location={location}
-          session={session}
-          className="z-50 col-span-1 h-full w-full rounded-full"
-          route={selectedRoute}
-        />
-      ) : null}
     </main>
   );
 };
