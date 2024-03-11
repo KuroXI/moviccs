@@ -1,8 +1,9 @@
-import { XCircle } from "lucide-react";
+import { ArrowUpDown, XCircle } from "lucide-react";
 import { type ColumnDef } from "@tanstack/react-table";
 import type { IOrder } from "@/types";
 import { Checkbox } from "../ui/checkbox";
 import { calculateTotalWeight, formatCurrency, formatMeter, handleFilter } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 export const orderTableDef = (maxWeight: number): ColumnDef<IOrder>[] => {
   return [
@@ -26,30 +27,42 @@ export const orderTableDef = (maxWeight: number): ColumnDef<IOrder>[] => {
     },
     {
       accessorKey: "address",
-      header: () => {
-        return <h1>Address</h1>;
-      },
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Address
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => row.original.address,
     },
     {
       accessorKey: "distance",
-      header: () => {
-        return <h1 className="text-right">Distance</h1>;
-      },
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Distance
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => formatMeter(row.original.distance),
     },
     {
       accessorKey: "weight",
-      header: () => {
-        return <h1 className="text-right">Weight</h1>;
-      },
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Weight
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => <h1 className="text-right">{calculateTotalWeight(row.original.items)} kg</h1>,
     },
     {
       accessorKey: "price",
-      header: () => {
-        return <h1 className="text-right">Price</h1>;
-      },
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Price
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => (
         <h1 className="text-right">
           {formatCurrency(row.original.items.reduce((acc, item) => acc + item.price * item.amount, 0))}

@@ -11,6 +11,8 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   type ColumnFiltersState,
+  type SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { ScrollArea } from "../ui/scroll-area";
 import { Button } from "../ui/button";
@@ -26,6 +28,7 @@ type OrderKnapsackProps = {
 };
 
 export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
@@ -36,11 +39,14 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: () => setColumnFilters,
     onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
     state: {
       rowSelection,
       columnFilters,
+      sorting,
     },
   });
 
@@ -82,7 +88,6 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
           of {maxWeight}kg weight
         </h1>
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline">Sorting</Button>
           <Button variant="secondary" size="sm" onClick={takeOrder}>
             Auto pick
           </Button>
