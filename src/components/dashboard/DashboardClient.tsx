@@ -64,7 +64,7 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
           location={location}
           session={session}
           className="z-10 row-span-1 h-full min-h-96 w-full rounded-full"
-          route={route}
+          orderRoute={route?.orderRoute}
         />
       ) : null}
       <div className="row-span-1 flex flex-col gap-5 p-3">
@@ -83,7 +83,9 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
           </Button>
         </div>
 
-        <DeliveriesTable route={route} />
+        <DeliveriesTable 
+          route={route} 
+        />
       </div>
     </main>
   );

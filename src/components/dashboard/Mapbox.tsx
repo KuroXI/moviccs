@@ -2,7 +2,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import ReactMapGL, { Layer, Marker, Source } from "react-map-gl";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
-import type { Coordinate, RouteDetails } from "@/types";
+import type { Coordinate, OrderRoute } from "@/types";
 import { env } from "@/env";
 import { AvatarRider } from "./AvatarRider";
 import { type Session } from "next-auth";
@@ -13,11 +13,13 @@ type MapboxProps = {
   className?: string;
   location: Coordinate;
   session: Session;
-  route: RouteDetails | null;
+  orderRoute: OrderRoute[] | undefined;
 };
 
-export const Mapbox = ({ className, location, session, route }: MapboxProps) => {
+export const Mapbox = ({ className, location, session, orderRoute }: MapboxProps) => {
   const { theme } = useTheme();
+
+  console.log('MapBox OrderRoute', orderRoute)
 
   return (
     <div className={cn(className)}>
@@ -34,8 +36,8 @@ export const Mapbox = ({ className, location, session, route }: MapboxProps) => 
           zoom: 14.81,
         }}
       >
-        {route?.orderRoute.length
-          ? route.orderRoute.map((order, index) => (
+        {orderRoute?.length
+          ? orderRoute.map((order, index) => (
               <Source
                 key={`${order.destinationId}-source-${index}`}
                 id={`${order.destinationId}-source-${index}`}
@@ -54,8 +56,9 @@ export const Mapbox = ({ className, location, session, route }: MapboxProps) => 
               </Source>
             ))
           : null}
-        {route?.orderRoute.length
-          ? route.orderRoute.map(
+
+        {orderRoute?.length
+          ? orderRoute.map(
               ({ order, destinationId }, index) =>
                 order !== null && (
                   <Marker
@@ -68,6 +71,7 @@ export const Mapbox = ({ className, location, session, route }: MapboxProps) => 
                 ),
             )
           : null}
+
         <Marker latitude={location.latitude} longitude={location.longitude}>
           <AvatarRider session={session} />
         </Marker>
