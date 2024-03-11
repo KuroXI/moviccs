@@ -4,8 +4,8 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "../ui/table";
 import { type Session } from "next-auth";
 import { useEffect, type Dispatch, type SetStateAction, useState } from "react";
-import { formatMeter } from "@/lib/formatMeter";
 import { generateDeliveryRoute } from "@/functions/generateDeliveryRoute";
+import { formatMeter } from "@/lib/utils";
 
 type OrderRouteProps = {
   location: Coordinate;
@@ -32,7 +32,7 @@ export const OrderRoute = ({ location, session, selectedOrder, selectedRoute, se
 
   return (
     <div className="grid min-h-96 grid-cols-3">
-      <ScrollArea className="col-span-1 flex flex-col items-end justify-between">
+      <ScrollArea className="col-span-1 flex max-h-96 flex-col items-end justify-between">
         <Table>
           <TableHeader>
             <TableRow>

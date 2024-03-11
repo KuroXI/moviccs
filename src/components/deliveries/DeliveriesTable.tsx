@@ -1,8 +1,8 @@
 import { type RouteDetails } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { formatMeter } from "@/lib/formatMeter";
 import { OrderDialog } from "./OrderDialog";
+import { formatMeter } from "@/lib/utils";
 
 type DeliveriesTableProps = {
   route: RouteDetails | null;

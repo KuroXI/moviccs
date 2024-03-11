@@ -1,9 +1,10 @@
-import { type IOrder } from "@/types";
+import type { RowSelection } from "@/types";
 import { getPriceWeightRatio } from "./getPriceWeightRatio";
+import { calculateTotalWeight } from "@/lib/utils";
 
 type KnapsackInput = {
   maxWeight: number;
-  orders: IOrder[];
+  orders: RowSelection[];
 };
 
 /**
@@ -15,8 +16,8 @@ type KnapsackInput = {
  *
  * Even though Item A has higher absolute value, Item B gives us more value per unit of weight.
  */
-export const knapsack = ({ maxWeight, orders }: KnapsackInput): IOrder[] => {
-  orders.sort((a, b) => getPriceWeightRatio(b.items) - getPriceWeightRatio(a.items));
+export const knapsack = ({ maxWeight, orders }: KnapsackInput) => {
+  orders.sort((a, b) => getPriceWeightRatio(b.order.items) - getPriceWeightRatio(a.order.items));
 
   let totalWeight = 0;
   const sack = [];
@@ -24,7 +25,7 @@ export const knapsack = ({ maxWeight, orders }: KnapsackInput): IOrder[] => {
   for (const order of orders) {
     if (totalWeight === maxWeight) break;
 
-    const itemTotalWeight = order.items.reduce((acc, item) => acc + item.weight * item.amount, 0);
+    const itemTotalWeight = calculateTotalWeight(order.order.items);
     if (itemTotalWeight + totalWeight <= maxWeight) {
       sack.push(order);
       totalWeight += itemTotalWeight;
