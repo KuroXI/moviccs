@@ -43,7 +43,7 @@ export const OrderRoute = ({ location, session, selectedOrder, selectedRoute, se
           <TableBody>
             {routes.map((route, index) => (
               <TableRow key={route.routeDistance} onClick={() => setSelectedRoute(route)}>
-                <TableHead>Path {index}</TableHead>
+                <TableHead>Path {index + 1}</TableHead>
                 <TableHead className="text-end">{formatMeter(route.routeDistance)}</TableHead>
               </TableRow>
             ))}
@@ -55,7 +55,7 @@ export const OrderRoute = ({ location, session, selectedOrder, selectedRoute, se
         className="z-50 col-span-2 h-full w-full p-5"
         location={location}
         session={session}
-        route={selectedRoute}
+        orderRoute={selectedRoute?.orderRoute}
       />
     </div>
   );
