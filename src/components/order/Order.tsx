@@ -1,16 +1,17 @@
 "use client";
 
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { type Dispatch, useState, useEffect, type SetStateAction } from "react";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { OrderKnapsack } from "./OrderKnapsack";
-import type { Coordinate, IOrder, RouteDetails } from "@/types";
+import type { Coordinate, IOrder, RouteDetails, RowSelection } from "@/types";
 import { toast } from "sonner";
 import { OrderRoute } from "./OrderRoute";
 import { type Session } from "next-auth";
+import { OrderFooter } from "./OrderFooter";
 
 type OrderProps = {
   orders: IOrder[] | undefined;
@@ -23,7 +24,7 @@ type OrderProps = {
 
 export const Order = ({ orders, deliveries, isFetching, session, location, setRoute }: OrderProps) => {
   const [page, setPage] = useState(0);
-  const [selectedOrder, setSelectedOrder] = useState<IOrder[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<RowSelection[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteDetails | null>(null);
 
   useEffect(() => setPage(!deliveries?.length ? 1 : 2), [deliveries]);
@@ -74,40 +75,25 @@ export const Order = ({ orders, deliveries, isFetching, session, location, setRo
         </div>
 
         {page === 1 && orders ? (
-          <OrderKnapsack orders={orders} selectedOrder={selectedOrder} setSelectedOrder={setSelectedOrder} />
+          <OrderKnapsack
+            maxWeight={session.user.maxWeight}
+            orders={orders}
+            selectedOrder={selectedOrder}
+            setSelectedOrder={setSelectedOrder}
+          />
         ) : null}
-        
+
         {page === 2 ? (
           <OrderRoute
             location={location}
             session={session}
-            selectedOrder={selectedOrder}
+            selectedOrder={selectedOrder.map((order) => order.order)}
             selectedRoute={selectedRoute}
             setSelectedRoute={setSelectedRoute}
           />
         ) : null}
 
-        <DialogFooter>
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={page <= (!deliveries?.length ? 1 : 2)}
-            onClick={() => setPage(page - 1)}
-          >
-            Back
-          </Button>
-          {page == 3 ? (
-            <DialogClose>
-              <Button size="sm" onClick={onConfirm}>
-                Confirm
-              </Button>
-            </DialogClose>
-          ) : (
-            <Button size="sm" onClick={() => setPage(page + 1)}>
-              Next
-            </Button>
-          )}
-        </DialogFooter>
+        <OrderFooter page={page} hasLength={!deliveries?.length} setPage={setPage} onConfirm={onConfirm} />
       </DialogContent>
     </Dialog>
   );

@@ -56,3 +56,8 @@ export type ImageResponse = {
     };
   }[];
 };
+
+export type RowSelection = {
+  index: number;
+  order: IOrder;
+}

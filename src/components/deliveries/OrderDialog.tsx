@@ -4,8 +4,8 @@ import { Dialog, DialogClose, DialogContent, DialogTrigger } from "../ui/dialog"
 import { type IOrder } from "@/types";
 import Image from "next/image";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { formatCurrency } from "@/lib/formatCurrency";
 import { Badge } from "../ui/badge";
+import { formatCurrency } from "@/lib/utils";
 
 type OrderDialogProps = {
   order: IOrder;

@@ -1,13 +1,12 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import ReactMapGL, { Layer, Marker, Source } from "react-map-gl";
-import { cn } from "@/lib/utils";
+import { cn, getColorByIndex } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import type { Coordinate, OrderRoute } from "@/types";
 import { env } from "@/env";
 import { AvatarRider } from "./AvatarRider";
 import { type Session } from "next-auth";
 import { IconOrderLocation } from "../deliveries/IconOrderLocation";
-import { getColorByIndex } from "@/lib/colorIndex";
 
 type MapboxProps = {
   className?: string;

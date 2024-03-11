@@ -7,41 +7,52 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model PendingDelivery {
+  orders    Order[]
+  ordersId  String? @unique
+  handler   User    @relation(name: "UserToPendingDelivery", fields: [handlerId], references: [id])
+  handlerId String  @id
+}
+
 model Order {
-  id          String         @id @default(cuid())
-  orderId     Int            @default(autoincrement())
-  address     String
-  distance    Float
-  status      DeliveryStatus @default(PLACED)
-  coordinates Float[] // [longitude, latitude]
-  items       Item[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  handler     User?          @relation(fields: [handlerId], references: [id])
-  handlerId   String?
+  id              String           @id @default(cuid())
+  orderId         Int              @default(autoincrement())
+  address         String
+  distance        Float
+  status          DeliveryStatus   @default(PLACED)
+  coordinates     Float[] // [longitude, latitude]
+  items           Item[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  handler         User?            @relation(fields: [handlerId], references: [id])
+  handlerId       String?
+  orderGroupId    String?
+  pendingDelivery PendingDelivery? @relation(fields: [orderGroupId], references: [ordersId])
 }
 
 model Item {
-  id        String  @id @default(cuid())
+  id        String @id @default(cuid())
   item      String
   amount    Int
   weight    Int
   price     Float
   image     String
-  orderBy   Order   @relation(fields: [orderById], references: [id], onDelete: Cascade)
+  orderBy   Order  @relation(fields: [orderById], references: [id], onDelete: Cascade)
   orderById String
 }
 
 // Main Table
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  deliveries    Order[]
+  id              String           @id @default(cuid())
+  name            String?
+  email           String?          @unique
+  emailVerified   DateTime?
+  image           String?
+  maxWeight       Int              @default(10) // in kg
+  accounts        Account[]
+  sessions        Session[]
+  deliveries      Order[]
+  pendingDelivery PendingDelivery? @relation(name: "UserToPendingDelivery")
 }
 
 // Next Auth Tables

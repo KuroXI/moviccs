@@ -40,18 +40,10 @@ export const orderRouter = createTRPCRouter({
 
   getAvailableOrder: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.order.findMany({
-      select: {
-        id: true,
-        orderId: true,
-        address: true,
-        status: true,
-        distance: true,
-        coordinates: true,
-        createdAt: true,
-        updatedAt: true,
-        items: true,
-        handlerId: true,
+      include: {
         handler: true,
+        items: true,
+        pendingDelivery: true,
       },
       where: {
         status: "PLACED",
@@ -62,21 +54,13 @@ export const orderRouter = createTRPCRouter({
 
   getDeliveryOrder: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.order.findMany({
-      select: {
-        id: true,
-        orderId: true,
-        address: true,
-        status: true,
-        distance: true,
-        coordinates: true,
-        createdAt: true,
-        updatedAt: true,
-        items: true,
-        handlerId: true,
+      include: {
         handler: true,
+        items: true,
+        pendingDelivery: true,
       },
       where: {
-        status: "CONFIRMED",
+        status: "PLACED",
         handlerId: ctx.session.user.id,
       },
     });

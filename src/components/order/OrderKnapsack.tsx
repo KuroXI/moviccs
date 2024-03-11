@@ -1,92 +1,123 @@
 "use client";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { ScrollArea } from "../ui/scroll-area";
-import { Button } from "../ui/button";
-import { ChevronUp } from "lucide-react";
 import { knapsack } from "@/functions/knapsack";
 import { toast } from "sonner";
-import type { IOrder } from "@/types";
-import { type Dispatch, type SetStateAction } from "react";
-import { getPriceWeightRatio } from "@/functions/getPriceWeightRatio";
+import type { IOrder, RowSelection } from "@/types";
+import { useState, type Dispatch, type SetStateAction, useEffect } from "react";
+import {
+  flexRender,
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  type ColumnFiltersState,
+} from "@tanstack/react-table";
+import { ScrollArea } from "../ui/scroll-area";
+import { Button } from "../ui/button";
+import { orderTableDef } from "./OrderTableDef";
+import { calculateTotalWeight, getRowSelection, handleFilter } from "@/lib/utils";
+import { Input } from "../ui/input";
 
 type OrderKnapsackProps = {
+  maxWeight: number;
   orders: IOrder[];
-  selectedOrder: IOrder[];
-  setSelectedOrder: Dispatch<SetStateAction<IOrder[]>>;
+  selectedOrder: RowSelection[];
+  setSelectedOrder: Dispatch<SetStateAction<RowSelection[]>>;
 };
 
-export const OrderKnapsack = ({ orders, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
+export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
+
+  const columns = orderTableDef(maxWeight);
+
+  const table = useReactTable({
+    data: orders,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: () => setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+      columnFilters,
+    },
+  });
+
+  useEffect(() => {
+    if (!selectedOrder) return;
+    return table.setRowSelection(() => getRowSelection(selectedOrder));
+  }, [orders, selectedOrder, table]);
+
   const takeOrder = async () => {
-    const order = knapsack({ maxWeight: 15, orders });
+    const order = knapsack({
+      maxWeight,
+      orders: table.getRowModel().rows.map((row) => ({
+        index: row.index,
+        order: row.original,
+      })),
+    });
 
     if (order.length === 0) {
-      toast.error("No orders can be taken");
-      return;
+      return toast.warning("No orders can be taken");
     }
 
+    table.setRowSelection(() => getRowSelection(order));
+
     setSelectedOrder(order);
+    toast.success("Orders taken");
   };
 
   return (
     <>
-      {selectedOrder.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Address</TableHead>
-              <TableHead>Distance</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Total Weight</TableHead>
-              <TableHead>Ratio</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {selectedOrder.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="line-clamp-2">{order.address}</TableCell>
-                <TableCell>{order.distance}</TableCell>
-                <TableCell>{order.items.reduce((acc, item) => (acc += item.price * item.amount), 0)}</TableCell>
-                <TableCell>{order.items.reduce((acc, item) => (acc += item.weight * item.amount), 0)}</TableCell>
-                <TableCell>{getPriceWeightRatio(order.items).toFixed(2)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : null}
-
-      <div className="flex w-full items-center justify-center">
-        <Button variant="outline" size="sm" onClick={takeOrder} disabled={Boolean(selectedOrder.length)}>
-          <ChevronUp /> Take Order
-        </Button>
+      <div className="flex items-center justify-between">
+        <div>
+          <Input placeholder="Search address..." />
+        </div>
+        <h1 className="flex text-sm text-muted-foreground">
+          Selected a total of {table.getFilteredSelectedRowModel().rows.length} with{" "}
+          {table
+            .getFilteredSelectedRowModel()
+            .rows.reduce((acc, item) => acc + calculateTotalWeight(item.original.items), 0)}{" "}
+          of {maxWeight}kg weight
+        </h1>
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="outline">Sorting</Button>
+          <Button variant="secondary" size="sm" onClick={takeOrder}>
+            Auto pick
+          </Button>
+        </div>
       </div>
-
       <ScrollArea className="max-h-96">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Address</TableHead>
-              <TableHead>Distance</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead className="truncate">Total Weight</TableHead>
-              <TableHead>Ratio</TableHead>
-            </TableRow>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
-            {orders ? (
-              orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="line-clamp-2">{order.address}</TableCell>
-                  <TableCell>{order.distance}</TableCell>
-                  <TableCell>{order.items.reduce((acc, item) => (acc += item.price * item.amount), 0)}</TableCell>
-                  <TableCell>{order.items.reduce((acc, item) => (acc += item.weight * item.amount), 0)}</TableCell>
-                  <TableCell>{getPriceWeightRatio(order.items).toFixed(2)}</TableCell>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className={`${handleFilter(maxWeight, table, row) ? "" : "text-muted"}`}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No orders available
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
                 </TableCell>
               </TableRow>
             )}
