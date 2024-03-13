@@ -94,9 +94,8 @@ export const orderRouter = createTRPCRouter({
       include: {
         orders: {
           include: {
-            handler: true,
             items: true,
-            pendingDelivery: true,
+            handler: true,
           },
         },
       },

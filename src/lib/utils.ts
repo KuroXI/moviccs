@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { IOrder, RowSelection } from "@/types";
+import type { HighlightedTextAccumulator, IOrder, RowSelection } from "@/types";
 import type { Row, Table } from "@tanstack/react-table";
 import { type Item } from "@prisma/client";
 
@@ -13,7 +13,7 @@ export const handleFilter = (maxWeight: number, table: Table<IOrder>, row: Row<I
 
   const rowWeight = calculateTotalWeight(row.original.items);
   const selectedWeight = table
-    .getFilteredSelectedRowModel()
+    .getSelectedRowModel()
     .rows.reduce((acc, item) => acc + calculateTotalWeight(item.original.items), 0);
   return rowWeight + selectedWeight <= maxWeight;
 };
@@ -59,4 +59,22 @@ export const getRowSelection = (row: RowSelection[]) => {
     rowSelection[order.index] = true;
   });
   return rowSelection;
+};
+
+export const handleHighlightedText = (text: string, position: number[][]): string[] => {
+  const { splittedAddress } = position.reduce(
+    (acc: HighlightedTextAccumulator, [start, end]) => {
+      if (start! > acc.currentIndex) {
+        acc.splittedAddress.push(text.substring(acc.currentIndex, start));
+      }
+
+      acc.splittedAddress.push(text.substring(start!, end! + 1));
+      acc.splittedAddress.push(text.substring(end! + 1));
+      acc.currentIndex = end! + 1;
+      return acc;
+    },
+    { splittedAddress: [], currentIndex: 0 },
+  );
+
+  return splittedAddress;
 };
