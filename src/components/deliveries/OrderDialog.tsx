@@ -6,6 +6,9 @@ import Image from "next/image";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import type { DeliveryStatus } from "@prisma/client";
+import { toast } from "sonner";
 
 type OrderDialogProps = {
   order: IOrder;
@@ -21,6 +24,33 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
 
     window.open(url, "_blank");
   };
+
+  const orderStatusMutation = api.order.setDeliveryStatus.useMutation();
+
+  const updateOrderStatus = (orderId: string, status: DeliveryStatus) => {
+    orderStatusMutation.mutate(
+      { orderId, status }, 
+      {
+        onSuccess: () => {
+          toast.success("Delivery status updated");
+          /* updateRoute(); */
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      }
+    )
+  };
+
+  const onOrderButtonEvent = (order : IOrder) => {
+
+    if (order.status === 'CONFIRMED') {
+      updateOrderStatus(order.id, 'DISPATCHED');
+    } else if (order.status === 'DISPATCHED') {
+      updateOrderStatus(order.id, 'DELIVERED');
+    }
+
+  }
 
   return (
     <Dialog>
@@ -41,7 +71,11 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
             </div>
 
             <DialogClose asChild>
-              <Button>Mark as delivered</Button>
+              <Button onClick={() => onOrderButtonEvent(order)}>{
+                order.status === 'CONFIRMED' 
+                ? 'START'
+                : 'Mark as Delivered'
+              }</Button>
             </DialogClose>
           </div>
 
@@ -55,51 +89,56 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
               <h1 className="font-light">{order.address}</h1>
             </div>
           </div>
-          <div>
-            <h1 className="text-base font-bold">Products</h1>
-            <div className="flex flex-col gap-1">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Weight</TableHead>
-                    <TableHead>Unit Price</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead className="text-end">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {order.items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="flex items-center gap-2">
-                        <Image
-                          onClick={() => openImage(item.image)}
-                          src={item.image}
-                          alt={item.item}
-                          width={30}
-                          height={75}
-                          className="max-h-24 max-w-12 rounded-md"
-                        />
-                        {item.item}
-                      </TableCell>
-                      <TableCell>{item.weight} kg</TableCell>
-                      <TableCell>{formatCurrency(item.price)}</TableCell>
-                      <TableCell>{item.amount}</TableCell>
-                      <TableCell className="text-end">{formatCurrency(item.amount * item.price)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-          <div className="flex flex-col gap-5 text-end">
+          { order.items ? (
             <div>
-              <h1 className="text-base font-medium">Total</h1>
-              <h1 className="text-lg font-bold">
-                {formatCurrency(order.items.reduce((acc, item) => (acc += item.price * item.amount), 0))}
-              </h1>
+              <h1 className="text-base font-bold">Products</h1>
+              <div className="flex flex-col gap-1">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Weight</TableHead>
+                      <TableHead>Unit Price</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead className="text-end">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {order.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="flex items-center gap-2">
+                          <Image
+                            onClick={() => openImage(item.image)}
+                            src={item.image}
+                            alt={item.item}
+                            width={30}
+                            height={75}
+                            className="max-h-24 max-w-12 rounded-md"
+                          />
+                          {item.item}
+                        </TableCell>
+                        <TableCell>{item.weight} kg</TableCell>
+                        <TableCell>{formatCurrency(item.price)}</TableCell>
+                        <TableCell>{item.amount}</TableCell>
+                        <TableCell className="text-end">{formatCurrency(item.amount * item.price)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-          </div>
+          ) : null }
+
+          { order.items ? (
+            <div className="flex flex-col gap-5 text-end">
+              <div>
+                <h1 className="text-base font-medium">Total</h1>
+                <h1 className="text-lg font-bold">
+                  {formatCurrency(order.items.reduce((acc, item) => (acc += item.price * item.amount), 0))}
+                </h1>
+              </div>
+            </div>
+          ) : null }
         </div>
       </DialogContent>
     </Dialog>

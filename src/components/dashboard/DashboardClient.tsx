@@ -3,7 +3,7 @@
 import { api } from "@/trpc/react";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import type { Coordinate, RouteDetails } from "@/types";
+import type { Coordinate, IOrder, RouteDetails } from "@/types";
 import { toast } from "sonner";
 import { Mapbox } from "./Mapbox";
 import type { Session } from "next-auth";
@@ -23,6 +23,7 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
 
   const orders = api.order.getAvailableOrder.useQuery();
   const deliveries = api.order.getDeliveryOrder.useQuery();
+  const pendingDeliveries = api.order.getPendingDeliveries.useQuery();
 
   const orderMutation = api.order.create.useMutation();
   const generate = () => {
@@ -84,7 +85,7 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
         </div>
 
         <DeliveriesTable 
-          route={route} 
+          orders={pendingDeliveries.data?.orders as IOrder[]} 
         />
       </div>
     </main>
