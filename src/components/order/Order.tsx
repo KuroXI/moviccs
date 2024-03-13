@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { OrderRoute } from "./OrderRoute";
 import { type Session } from "next-auth";
 import { OrderFooter } from "./OrderFooter";
-import { api } from "@/trpc/react";
 
 type OrderProps = {
   orders: IOrder[] | undefined;
@@ -44,25 +43,9 @@ export const Order = ({ orders, deliveries, isFetching, session, location, setRo
    * - [ ] add the selected order to the route using the setRoute function
    *       with updated route details
    */
-
-  const orderMutation = api.order.createPendingDelivery.useMutation();
-  const orderUpdate = () => {
-    orderMutation.mutate(
-      { orderIds: selectedOrder.map((order) => order.order.id) },
-      {
-        onSuccess: () => {
-          toast.success("Order confirmed");
-        },
-        onError: (error) => {
-          toast.error(error.message);
-        },
-      }
-    )
-  };
-
   const onConfirm = async () => {
     setRoute(selectedRoute);
-    if (selectedOrder) orderUpdate();
+
     return toast.success("Order confirmed");
   };
 
