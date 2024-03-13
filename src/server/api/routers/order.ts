@@ -66,34 +66,13 @@ export const orderRouter = createTRPCRouter({
     });
   }),
 
-  getPendingDeliveries: protectedProcedure.query(async ({ ctx })  => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    return await ctx.db.pendingDelivery.findUnique({
-      include: {
-        orders : true,
-      },
-      where: {
-        handlerId: ctx.session.user.id,
-      },
-    });
-  }),
-
-  createPendingDelivery: protectedProcedure
+  setDeliveryOrder: protectedProcedure
     .input(z.object({ orderIds: z.string().array() }))
     .mutation(async ({ ctx, input }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      await ctx.db.pendingDelivery.create({
-        data: {
-          handlerId: ctx.session.user.id,
-          ordersId: `pending-${ctx.session.user.id}`,
-        },
-      });
-
       await ctx.db.order.updateMany({
         data: {
           status: "CONFIRMED",
           handlerId: ctx.session.user.id,
-          orderGroupId: `pending-${ctx.session.user.id}`,
         },
         where: {
           id: {
