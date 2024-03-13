@@ -1,12 +1,12 @@
-import "mapbox-gl/dist/mapbox-gl.css";
-import ReactMapGL, { Layer, Marker, Source } from "react-map-gl";
-import { cn, getColorByIndex } from "@/lib/utils";
-import { useTheme } from "next-themes";
-import type { Coordinate, OrderRoute } from "@/types";
 import { env } from "@/env";
-import { AvatarRider } from "./AvatarRider";
+import { cn, getColorByIndex } from "@/lib/utils";
+import type { Coordinate, OrderRoute } from "@/types";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { type Session } from "next-auth";
+import { useTheme } from "next-themes";
+import ReactMapGL, { Layer, Marker, Source } from "react-map-gl";
 import { IconOrderLocation } from "../deliveries/IconOrderLocation";
+import { AvatarRider } from "./AvatarRider";
 
 type MapboxProps = {
   className?: string;
@@ -35,6 +35,7 @@ export const Mapbox = ({ className, location, session, orderRoute }: MapboxProps
           zoom: 14.81,
         }}
       >
+
         {orderRoute?.length
           ? orderRoute.map((order, index) => (
               <Source

@@ -5,7 +5,7 @@ import { OrderDialog } from "./OrderDialog";
 import { formatMeter } from "@/lib/utils";
 
 type DeliveriesTableProps = {
-  route: RouteDetails | null;
+  route: RouteDetails | undefined;
 };
 
 export const DeliveriesTable = ({ route }: DeliveriesTableProps) => {

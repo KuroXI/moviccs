@@ -1,17 +1,19 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { Button } from "../ui/button";
-import { type Dispatch, useState, useEffect, type SetStateAction } from "react";
-import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
+import { DataContext } from "@/context/DataContext";
 import { cn } from "@/lib/utils";
-import { OrderKnapsack } from "./OrderKnapsack";
 import type { Coordinate, IOrder, RouteDetails, RowSelection } from "@/types";
-import { toast } from "sonner";
-import { OrderRoute } from "./OrderRoute";
 import { type Session } from "next-auth";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Separator } from "../ui/separator";
 import { OrderFooter } from "./OrderFooter";
+import { OrderKnapsack } from "./OrderKnapsack";
+import { OrderRoute } from "./OrderRoute";
+import { api } from "@/trpc/react";
 
 type OrderProps = {
   orders: IOrder[] | undefined;
@@ -19,13 +21,14 @@ type OrderProps = {
   isFetching: boolean;
   session: Session;
   location: Coordinate;
-  setRoute: Dispatch<SetStateAction<RouteDetails | null>>;
 };
 
-export const Order = ({ orders, deliveries, isFetching, session, location, setRoute }: OrderProps) => {
+export const Order = ({ orders, deliveries, isFetching, session, location }: OrderProps) => {
   const [page, setPage] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<RowSelection[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteDetails | null>(null);
+
+  const { route, setRouteDetails } = useContext(DataContext);
 
   useEffect(() => setPage(!deliveries?.length ? 1 : 2), [deliveries]);
 
@@ -37,16 +40,34 @@ export const Order = ({ orders, deliveries, isFetching, session, location, setRo
     }
   };
 
+  const pendingDelivery = api.order.setDeliveryOrder.useMutation();
+
   /**
    * TODO
    * - [ ] Set selected order to "CONFIRMED" (using server mutation)
    * - [ ] add the selected order to the route using the setRoute function
    *       with updated route details
    */
-  const onConfirm = async () => {
-    setRoute(selectedRoute);
 
-    return toast.success("Order confirmed");
+  const onConfirm = async () => {
+    console.log('Confirmed Route: ', route);
+    setRouteDetails!(route);
+
+    console.log('On Confirm Selected Order: ', selectedOrder);
+
+    pendingDelivery.mutate(
+      { orderIds: selectedOrder.map((order) => order.order.id)}, 
+      {
+        onSuccess: () => {
+          toast.success("Order confirmed");
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      }
+    );
+
+    return 'success';
   };
 
   return (

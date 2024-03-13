@@ -1,14 +1,15 @@
 "use client";
 
+import { DataContext } from "@/context/DataContext";
 import { api } from "@/trpc/react";
-import { Button } from "../ui/button";
-import { useState } from "react";
-import type { Coordinate, RouteDetails } from "@/types";
-import { toast } from "sonner";
-import { Mapbox } from "./Mapbox";
+import type { Coordinate } from "@/types";
 import type { Session } from "next-auth";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { DeliveriesTable } from "../deliveries/DeliveriesTable";
 import { Order } from "../order/Order";
+import { Button } from "../ui/button";
+import { Mapbox } from "./Mapbox";
 
 type DashboardClientProps = {
   session: Session;
@@ -19,7 +20,12 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
     latitude: 14.662039,
     longitude: 121.058082,
   });
-  const [route, setRoute] = useState<RouteDetails | null>(null);
+
+  const { route, routeDetails } = useContext(DataContext);
+
+  console.log('DashboardClient routeDetails: ', routeDetails);
+
+  useEffect(() => {console.log('Route Details: ', routeDetails)}, [routeDetails]);
 
   const orders = api.order.getAvailableOrder.useQuery();
   const deliveries = api.order.getDeliveryOrder.useQuery();
@@ -59,14 +65,15 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
 
   return (
     <main className="grid h-full w-full grid-rows-2 p-5">
-      {deliveries.data ? (
+      { deliveries.data ? (
         <Mapbox
           location={location}
           session={session}
           className="z-10 row-span-1 h-full min-h-96 w-full rounded-full"
-          orderRoute={route?.orderRoute}
+          orderRoute={routeDetails?.orderRoute}
         />
       ) : null}
+
       <div className="row-span-1 flex flex-col gap-5 p-3">
         <div className="flex items-center justify-between">
           <Button onClick={generate}>Generate Order</Button>
@@ -76,7 +83,6 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
             isFetching={!(deliveries.isFetching === false && orders.isFetching === false)}
             session={session}
             location={location}
-            setRoute={setRoute}
           />
           <Button onClick={simulateDelivery} disabled={route === null}>
             Simulate Delivery
@@ -84,9 +90,9 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
         </div>
 
         <DeliveriesTable 
-          route={route} 
+          route={routeDetails} 
         />
-      </div>
+      </div>    
     </main>
   );
 };

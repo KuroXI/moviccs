@@ -69,10 +69,20 @@ export const orderRouter = createTRPCRouter({
   setDeliveryOrder: protectedProcedure
     .input(z.object({ orderIds: z.string().array() }))
     .mutation(async ({ ctx, input }) => {
+      const uniqueId = `pending-${Math.random().toString(36).substr(2, 9)}`;
+
+      await ctx.db.pendingDelivery.create({
+        data: {
+          handlerId: ctx.session.user.id,
+          ordersId: uniqueId
+        }
+      })
+
       await ctx.db.order.updateMany({
         data: {
           status: "CONFIRMED",
           handlerId: ctx.session.user.id,
+          orderGroupId: uniqueId,
         },
         where: {
           id: {
@@ -80,6 +90,25 @@ export const orderRouter = createTRPCRouter({
           },
         },
       });
+    }),
+
+  getPendingDeliveries: protectedProcedure
+    .query(async ({ ctx }) => {
+      return await ctx.db.pendingDelivery.findFirst({
+        include: {
+          orders: {
+            include: {
+              handler: true,
+              items: true,
+              pendingDelivery: true,
+            }
+          
+          }
+        },
+        where: {
+          handlerId: ctx.session.user.id,
+        }
+      })
     }),
 
   setDeliveryStatus: protectedProcedure
