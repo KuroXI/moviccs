@@ -3,8 +3,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { knapsack } from "@/functions/knapsack";
 import { toast } from "sonner";
-import type { IOrder, RowSelection } from "@/types";
-import { useState, type Dispatch, type SetStateAction, useEffect } from "react";
+import type { RowSelection } from "@/types";
+import { useState, type Dispatch, type SetStateAction, useEffect, useContext } from "react";
 import {
   flexRender,
   useReactTable,
@@ -21,18 +21,19 @@ import { orderTableDef } from "./OrderTableDef";
 import { getRowSelection, handleFilter } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { Toggle } from "../ui/toggle";
-import { Check } from "lucide-react";
+import { ALargeSmall } from "lucide-react";
+import { DataContext } from "@/context/DataContext";
 
 type OrderKnapsackProps = {
   maxWeight: number;
-  orders: IOrder[];
   selectedOrder: RowSelection[];
   setSelectedOrder: Dispatch<SetStateAction<RowSelection[]>>;
 };
 
-export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
-  const [isCaseSensitive, setIsCaseSensitive] = useState(false);
+export const OrderKnapsack = ({ maxWeight, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
+  const { orders } = useContext(DataContext);
 
+  const [isCaseSensitive, setIsCaseSensitive] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -41,7 +42,7 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
   const columns = orderTableDef(maxWeight, isCaseSensitive);
 
   const table = useReactTable({
-    data: orders,
+    data: orders!.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -59,7 +60,7 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
     initialState: {
       sorting: [
         {
-          desc: false,
+          desc: true,
           id: "select",
         },
       ],
@@ -81,13 +82,16 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
     });
 
     if (order.length === 0) {
-      return toast.warning("No orders can be taken");
+      return toast.warning("No available orders. Please try again.");
     }
+
+    const column = table.getColumn("select");
+    column?.toggleSorting(true);
 
     table.setRowSelection(() => getRowSelection(order));
 
     setSelectedOrder(order);
-    toast.success("Orders taken");
+    toast.success("Successfully picked orders using knapsack algorithm.");
   };
 
   return (
@@ -107,14 +111,14 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
             onPressedChange={(press) => setIsCaseSensitive(press)}
             pressed={isCaseSensitive}
           >
-            <Check size={15} />
+            <ALargeSmall size={20} />
           </Toggle>
         </div>
         <div className="flex items-center justify-end gap-3">
           <Button onClick={() => table.toggleAllRowsSelected(false)} variant="ghost" size="sm">
             Clear selection
           </Button>
-          <Button size="sm" onClick={takeOrder}>
+          <Button size="sm" onClick={takeOrder} disabled={table.getSelectedRowModel().rows.length > 0}>
             Auto pick
           </Button>
         </div>

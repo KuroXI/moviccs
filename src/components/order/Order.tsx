@@ -16,21 +16,25 @@ import { OrderRoute } from "./OrderRoute";
 import { api } from "@/trpc/react";
 
 type OrderProps = {
-  orders: IOrder[] | undefined;
   deliveries: IOrder[] | undefined;
-  isFetching: boolean;
   session: Session;
   location: Coordinate;
 };
 
-export const Order = ({ orders, deliveries, isFetching, session, location }: OrderProps) => {
-  const [page, setPage] = useState(0);
+export const Order = ({ deliveries, session, location }: OrderProps) => {
+  const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<RowSelection[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<RouteDetails | null>(null);
 
-  const { route, setRouteDetails } = useContext(DataContext);
+  const { orders, route, setRouteDetails } = useContext(DataContext);
 
-  useEffect(() => setPage(!deliveries?.length ? 1 : 2), [deliveries]);
+  useEffect(() => {
+    if (deliveries?.length) {
+      setSelectedOrder(deliveries.map((order) => ({ order })));
+    }
+
+    setPage(!deliveries?.length ? 1 : 2);
+  }, [deliveries]);
 
   const handleVisibilityEvent = (open: boolean) => {
     if (!open) {
@@ -41,7 +45,6 @@ export const Order = ({ orders, deliveries, isFetching, session, location }: Ord
   };
 
   const pendingDelivery = api.order.setDeliveryOrder.useMutation();
-
   const onConfirm = async () => {
     pendingDelivery.mutate(
       { orderIds: selectedOrder.map((order) => order.order.id) },
@@ -60,7 +63,7 @@ export const Order = ({ orders, deliveries, isFetching, session, location }: Ord
   return (
     <Dialog onOpenChange={handleVisibilityEvent}>
       <DialogTrigger asChild>
-        <Button disabled={isFetching}>Order</Button>
+        <Button disabled={orders?.isFetching}>Order</Button>
       </DialogTrigger>
 
       <DialogContent className="w-full max-w-screen-lg">
@@ -85,7 +88,6 @@ export const Order = ({ orders, deliveries, isFetching, session, location }: Ord
         {page === 1 && orders ? (
           <OrderKnapsack
             maxWeight={session.user.maxWeight}
-            orders={orders}
             selectedOrder={selectedOrder}
             setSelectedOrder={setSelectedOrder}
           />

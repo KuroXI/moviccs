@@ -26,8 +26,7 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
 
   const { route, routeDetails } = useContext(DataContext);
 
-  const orders = api.order.getAvailableOrder.useQuery();
-  const deliveries = api.order.getDeliveryOrder.useQuery();
+  const deliveries = api.order.getPendingDeliveries.useQuery();
 
   const orderMutation = api.order.create.useMutation();
   const generate = () => {
@@ -111,13 +110,7 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
               </div>
             </PopoverContent>
           </Popover>
-          <Order
-            orders={orders.data}
-            deliveries={deliveries.data}
-            isFetching={!(deliveries.isFetching === false && orders.isFetching === false)}
-            session={session}
-            location={location}
-          />
+          <Order deliveries={deliveries.data?.orders} session={session} location={location} />
           <Button onClick={simulateDelivery} disabled={route === null}>
             Simulate Delivery
           </Button>

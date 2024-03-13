@@ -1,4 +1,8 @@
 import type { Item, Order, User } from "@prisma/client";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import type { UseTRPCQueryResult } from "@trpc/react-query/shared";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "./server/api/root";
 
 export interface IOrder extends Order {
   items: Item[];
@@ -58,6 +62,16 @@ export type ImageResponse = {
 };
 
 export type RowSelection = {
-  index: number;
+  index?: number;
   order: IOrder;
-}
+};
+
+export type HighlightedTextAccumulator = {
+  currentIndex: number;
+  splittedAddress: string[];
+};
+
+export type AvailableOrder = UseTRPCQueryResult<
+  inferRouterOutputs<AppRouter>["order"]["getAvailableOrder"],
+  TRPCClientErrorLike<AppRouter>
+>;

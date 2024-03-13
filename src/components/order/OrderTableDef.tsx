@@ -2,7 +2,7 @@ import { ArrowUpDown } from "lucide-react";
 import { type ColumnDef } from "@tanstack/react-table";
 import type { IOrder } from "@/types";
 import { Checkbox } from "../ui/checkbox";
-import { calculateTotalWeight, formatCurrency, formatMeter, handleFilter } from "@/lib/utils";
+import { calculateTotalWeight, formatCurrency, formatMeter, handleFilter, handleHighlightedText } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { stringMatching } from "@/functions/stringMatching";
 
@@ -42,24 +42,11 @@ export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
         </Button>
       ),
       cell: ({ row, column }) => {
-        // ! BUG: When filter is set, user still can select more order
         if (row.columnFilters.address === true) {
           const filterValue = column.getFilterValue() as string;
           const { position } = stringMatching(row.original.address, filterValue, isCaseSensitive);
 
-          const { split: splittedAddress } = position.reduce(
-            (acc: { split: string[]; currentIndex: number }, [start, end]) => {
-              if (start! > acc.currentIndex) {
-                acc.split.push(row.original.address.substring(acc.currentIndex, start));
-              }
-
-              acc.split.push(row.original.address.substring(start!, end! + 1));
-              acc.split.push(row.original.address.substring(end! + 1));
-              acc.currentIndex = end! + 1;
-              return acc;
-            },
-            { split: [], currentIndex: 0 },
-          );
+          const splittedAddress = handleHighlightedText(row.original.address, position);
 
           return splittedAddress.map((word, index) => {
             const isEqual = isCaseSensitive ? word === filterValue : word.toLowerCase() === filterValue.toLowerCase();
@@ -77,10 +64,8 @@ export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
       },
       filterFn: (rows, id, filterValue) => {
         const { position } = stringMatching(rows.original.address, filterValue as string, isCaseSensitive);
-
         return position.length > 0;
       },
-      enableSorting: true,
     },
     {
       accessorKey: "distance",
@@ -91,6 +76,11 @@ export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
         </Button>
       ),
       cell: ({ row }) => <h1 className="text-center">{formatMeter(row.original.distance)}</h1>,
+      sortingFn: (a, b) => {
+        const aValue = a.original.distance;
+        const bValue = b.original.distance;
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      },
     },
     {
       accessorKey: "weight",
@@ -101,6 +91,11 @@ export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
         </Button>
       ),
       cell: ({ row }) => <h1 className="text-center">{calculateTotalWeight(row.original.items)} kg</h1>,
+      sortingFn: (a, b) => {
+        const aValue = calculateTotalWeight(a.original.items);
+        const bValue = calculateTotalWeight(b.original.items);
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      },
     },
     {
       accessorKey: "price",
@@ -115,6 +110,11 @@ export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
           {formatCurrency(row.original.items.reduce((acc, item) => acc + item.price * item.amount, 0))}
         </h1>
       ),
+      sortingFn: (a, b) => {
+        const aValue = a.original.items.reduce((acc, item) => acc + item.price * item.amount, 0);
+        const bValue = b.original.items.reduce((acc, item) => acc + item.price * item.amount, 0);
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      },
     },
   ];
 };
