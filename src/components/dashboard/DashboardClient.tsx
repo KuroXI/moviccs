@@ -4,7 +4,7 @@ import { DataContext } from "@/context/DataContext";
 import { api } from "@/trpc/react";
 import type { Coordinate } from "@/types";
 import type { Session } from "next-auth";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "sonner";
 import { DeliveriesTable } from "../deliveries/DeliveriesTable";
 import { Order } from "../order/Order";
