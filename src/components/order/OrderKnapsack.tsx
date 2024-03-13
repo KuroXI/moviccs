@@ -13,12 +13,15 @@ import {
   type ColumnFiltersState,
   type SortingState,
   getSortedRowModel,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import { ScrollArea } from "../ui/scroll-area";
 import { Button } from "../ui/button";
 import { orderTableDef } from "./OrderTableDef";
-import { calculateTotalWeight, getRowSelection, handleFilter } from "@/lib/utils";
+import { getRowSelection, handleFilter } from "@/lib/utils";
 import { Input } from "../ui/input";
+import { Toggle } from "../ui/toggle";
+import { Check } from "lucide-react";
 
 type OrderKnapsackProps = {
   maxWeight: number;
@@ -28,11 +31,14 @@ type OrderKnapsackProps = {
 };
 
 export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
+  const [isCaseSensitive, setIsCaseSensitive] = useState(false);
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const columns = orderTableDef(maxWeight);
+  const columns = orderTableDef(maxWeight, isCaseSensitive);
 
   const table = useReactTable({
     data: orders,
@@ -40,13 +46,23 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: () => setColumnFilters,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     state: {
       rowSelection,
       columnFilters,
+      columnVisibility,
       sorting,
+    },
+    initialState: {
+      sorting: [
+        {
+          desc: false,
+          id: "select",
+        },
+      ],
     },
   });
 
@@ -77,18 +93,28 @@ export const OrderKnapsack = ({ maxWeight, orders, selectedOrder, setSelectedOrd
   return (
     <>
       <div className="flex items-center justify-between">
-        <div>
-          <Input placeholder="Search address..." />
+        <div className="flex w-full max-w-xs items-center gap-2">
+          <Input
+            id="address-search"
+            name="address-search"
+            placeholder="Search address..."
+            value={(table.getColumn("address")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("address")?.setFilterValue(event.target.value)}
+          />
+          <Toggle
+            aria-label="Toggle case-sensitive"
+            size="sm"
+            onPressedChange={(press) => setIsCaseSensitive(press)}
+            pressed={isCaseSensitive}
+          >
+            <Check size={15} />
+          </Toggle>
         </div>
-        <h1 className="flex text-sm text-muted-foreground">
-          Selected a total of {table.getFilteredSelectedRowModel().rows.length} with{" "}
-          {table
-            .getFilteredSelectedRowModel()
-            .rows.reduce((acc, item) => acc + calculateTotalWeight(item.original.items), 0)}{" "}
-          of {maxWeight}kg weight
-        </h1>
-        <div className="flex items-center justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={takeOrder}>
+        <div className="flex items-center justify-end gap-3">
+          <Button onClick={() => table.toggleAllRowsSelected(false)} variant="ghost" size="sm">
+            Clear selection
+          </Button>
+          <Button size="sm" onClick={takeOrder}>
             Auto pick
           </Button>
         </div>

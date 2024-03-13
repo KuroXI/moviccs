@@ -21,12 +21,9 @@ export const OrderRoute = ({ location, session, selectedOrder, }: OrderRouteProp
 
   const { route,  setRoute } = useContext(DataContext);
 
-  console.log(routes);
-
   useEffect(() => {
     const fetchRoutes = async () => {
       const paths = await generateDeliveryRoute(location, selectedOrder);
-      console.log(paths, "paths");
       setRoutes(paths);
     };
 

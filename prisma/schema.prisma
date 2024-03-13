@@ -9,7 +9,7 @@ generator client {
 
 model PendingDelivery {
   orders    Order[]
-  ordersId  String? @unique
+  ordersId  String  @default(cuid()) @unique
   handler   User    @relation(name: "UserToPendingDelivery", fields: [handlerId], references: [id])
   handlerId String  @id
 }

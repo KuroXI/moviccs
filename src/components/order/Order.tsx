@@ -42,32 +42,19 @@ export const Order = ({ orders, deliveries, isFetching, session, location }: Ord
 
   const pendingDelivery = api.order.setDeliveryOrder.useMutation();
 
-  /**
-   * TODO
-   * - [ ] Set selected order to "CONFIRMED" (using server mutation)
-   * - [ ] add the selected order to the route using the setRoute function
-   *       with updated route details
-   */
-
   const onConfirm = async () => {
-    console.log('Confirmed Route: ', route);
-    setRouteDetails!(route);
-
-    console.log('On Confirm Selected Order: ', selectedOrder);
-
     pendingDelivery.mutate(
-      { orderIds: selectedOrder.map((order) => order.order.id)}, 
+      { orderIds: selectedOrder.map((order) => order.order.id) },
       {
         onSuccess: () => {
+          setRouteDetails!(route);
           toast.success("Order confirmed");
         },
         onError: (error) => {
           toast.error(error.message);
         },
-      }
+      },
     );
-
-    return 'success';
   };
 
   return (
@@ -77,7 +64,7 @@ export const Order = ({ orders, deliveries, isFetching, session, location }: Ord
       </DialogTrigger>
 
       <DialogContent className="w-full max-w-screen-lg">
-        <div className="pointer-events-none flex items-center justify-between whitespace-nowrap px-10 py-5">
+        <div className="pointer-events-none flex items-center justify-between whitespace-nowrap p-10">
           <div className="flex items-center justify-center">
             <Badge className={page > 0 ? "bg-green-500" : ""}>Order</Badge>
           </div>
