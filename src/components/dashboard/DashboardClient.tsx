@@ -10,6 +10,9 @@ import { DeliveriesTable } from "../deliveries/DeliveriesTable";
 import { Order } from "../order/Order";
 import { Button } from "../ui/button";
 import { Mapbox } from "./Mapbox";
+import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 type DashboardClientProps = {
   session: Session;
@@ -22,10 +25,6 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
   });
 
   const { route, routeDetails } = useContext(DataContext);
-
-  console.log('DashboardClient routeDetails: ', routeDetails);
-
-  useEffect(() => {console.log('Route Details: ', routeDetails)}, [routeDetails]);
 
   const orders = api.order.getAvailableOrder.useQuery();
   const deliveries = api.order.getDeliveryOrder.useQuery();
@@ -63,9 +62,25 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
     }
   };
 
+  const [weight, setWeight] = useState(session.user.maxWeight);
+  const userMaxWeightMutation = api.user.setMaxWeight.useMutation();
+  const mutateWeight = () => {
+    userMaxWeightMutation.mutate(
+      { weight },
+      {
+        onSuccess: () => {
+          toast.success("Max weight updated");
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      },
+    );
+  };
+
   return (
     <main className="grid h-full w-full grid-rows-2 p-5">
-      { deliveries.data ? (
+      {deliveries.data ? (
         <Mapbox
           location={location}
           session={session}
@@ -77,6 +92,25 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
       <div className="row-span-1 flex flex-col gap-5 p-3">
         <div className="flex items-center justify-between">
           <Button onClick={generate}>Generate Order</Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">Set Max Weight</Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Max weight</h4>
+                  <p className="text-sm text-muted-foreground">Set the maximum weight that you can carry.</p>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <Input type="number" value={weight} onChange={(e) => setWeight(parseInt(e.target.value))} />
+                  <PopoverClose asChild>
+                    <Button onClick={mutateWeight}>Set Weight</Button>
+                  </PopoverClose>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <Order
             orders={orders.data}
             deliveries={deliveries.data}
@@ -89,10 +123,8 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
           </Button>
         </div>
 
-        <DeliveriesTable 
-          route={routeDetails} 
-        />
-      </div>    
+        <DeliveriesTable route={routeDetails} />
+      </div>
     </main>
   );
 };
