@@ -2,7 +2,8 @@
 
 import { DataContext } from "@/context/DataContext";
 import { cn } from "@/lib/utils";
-import type { Coordinate, IOrder, RouteDetails, RowSelection } from "@/types";
+import { api } from "@/trpc/react";
+import type { Coordinate, IOrder, RowSelection } from "@/types";
 import { type Session } from "next-auth";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -13,7 +14,6 @@ import { Separator } from "../ui/separator";
 import { OrderFooter } from "./OrderFooter";
 import { OrderKnapsack } from "./OrderKnapsack";
 import { OrderRoute } from "./OrderRoute";
-import { api } from "@/trpc/react";
 
 type OrderProps = {
   deliveries: IOrder[] | undefined;
@@ -24,9 +24,8 @@ type OrderProps = {
 export const Order = ({ deliveries, session, location }: OrderProps) => {
   const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<RowSelection[]>([]);
-  const [selectedRoute, setSelectedRoute] = useState<RouteDetails | null>(null);
 
-  const { orders, route, setRouteDetails } = useContext(DataContext);
+  const { orders, handleUpdate } = useContext(DataContext);
 
   useEffect(() => {
     if (deliveries?.length) {
@@ -40,23 +39,24 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
     if (!open) {
       setPage(!deliveries?.length ? 1 : 2);
       setSelectedOrder([]);
-      setSelectedRoute(null);
+
     }
   };
 
   const pendingDelivery = api.order.setDeliveryOrder.useMutation();
+
   const onConfirm = async () => {
     pendingDelivery.mutate(
-      { orderIds: selectedOrder.map((order) => order.order.id) },
+      { orderIds: selectedOrder.map((order) => order.order.id)}, 
       {
         onSuccess: () => {
-          setRouteDetails!(route);
+          handleUpdate!();
           toast.success("Order confirmed");
         },
         onError: (error) => {
           toast.error(error.message);
         },
-      },
+      }
     );
   };
 
@@ -98,8 +98,6 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
             location={location}
             session={session}
             selectedOrder={selectedOrder.map((order) => order.order)}
-            selectedRoute={selectedRoute}
-            setSelectedRoute={setSelectedRoute}
           />
         ) : null}
 

@@ -1,11 +1,16 @@
+import { DataContext } from "@/context/DataContext";
+import { formatCurrency } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import { type IOrder } from "@/types";
+import { type DeliveryStatus } from "@prisma/client";
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { useContext } from "react";
+import { toast } from "sonner";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "../ui/dialog";
-import { type IOrder } from "@/types";
-import Image from "next/image";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { Badge } from "../ui/badge";
-import { formatCurrency } from "@/lib/utils";
 
 type OrderDialogProps = {
   order: IOrder;
@@ -21,6 +26,31 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
 
     window.open(url, "_blank");
   };
+
+  const { handleUpdate, setLocation } = useContext(DataContext);
+
+  const statusMutation = api.order.setDeliveryStatus.useMutation();
+  const updateOrder = (order : IOrder, status : DeliveryStatus) => {
+    statusMutation.mutate(
+      { orderId: order.id, status: status }, 
+      {
+        onSuccess: () => {
+          handleUpdate!();
+
+          if (status === 'DELIVERED') {
+            setLocation!({ 
+              latitude: order.coordinates[0] ?? 0, 
+              longitude: order.coordinates[1] ?? 0
+            })
+          }
+
+          toast.success(status === 'DISPATCHED' ? 'Proceed to Delivery' : 'Order Delivered');
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        }
+      })
+  }
 
   return (
     <Dialog>
@@ -41,7 +71,9 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
             </div>
 
             <DialogClose asChild>
-              <Button>Mark as delivered</Button>
+              { order.status === 'CONFIRMED' 
+              ? <Button onClick={() => updateOrder(order, 'DISPATCHED')} >START</Button>
+              : <Button onClick={() => updateOrder(order, 'DELIVERED')}  disabled={order.status === 'DELIVERED'}>Mark as delivered</Button>}
             </DialogClose>
           </div>
 
