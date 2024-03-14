@@ -25,8 +25,8 @@ export const Navbar = ({ session }: NavbarProps) => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 border-b">
-      <MaxWidthWrapper className="flex items-center justify-between px-5 py-2 backdrop-blur-lg">
+    <header className="sticky top-0 z-50 border-b backdrop-blur-lg">
+      <MaxWidthWrapper className="flex items-center justify-between px-5 py-2">
         <h1>Moviccs</h1>
         {session ? (
           <DropdownMenu>

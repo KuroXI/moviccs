@@ -1,8 +1,8 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import type { HighlightedTextAccumulator, IOrder, RowSelection } from "@/types";
-import type { Row, Table } from "@tanstack/react-table";
 import { type Item } from "@prisma/client";
+import type { Row, Table } from "@tanstack/react-table";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -56,6 +56,7 @@ export const getRowSelection = (row: RowSelection[]) => {
   const rowSelection = {} as unknown as Record<string, boolean>;
 
   row.forEach((order) => {
+    if (!order.index) return;
     rowSelection[order.index] = true;
   });
   return rowSelection;
