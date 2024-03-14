@@ -75,3 +75,10 @@ export type AvailableOrder = UseTRPCQueryResult<
   inferRouterOutputs<AppRouter>["order"]["getAvailableOrder"],
   TRPCClientErrorLike<AppRouter>
 >;
+
+export type HistoryDeliveries = {
+  orderId: number;
+  id: string;
+  address: string;
+  updatedAt: Date;
+}[];

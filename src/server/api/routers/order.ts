@@ -114,13 +114,19 @@ export const orderRouter = createTRPCRouter({
 
   getHistoryDeliveries: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.order.findMany({
-      include: {
-        items: true,
-        handler: true,
+      select: {
+        id: true,
+        address : true,
+        orderId: true,
+        updatedAt: true,
       },
       where: {
+        status: "DELIVERED",
         handlerId: ctx.session.user.id,
       },
+      orderBy: {
+        updatedAt: "desc",
+      }
     })
   }),
 });
