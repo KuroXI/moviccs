@@ -5,8 +5,12 @@ import { Checkbox } from "../ui/checkbox";
 import { calculateTotalWeight, formatCurrency, formatMeter, handleFilter, handleHighlightedText } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { stringMatching } from "@/functions/stringMatching";
+import { useContext } from "react";
+import { DataContext } from "@/context/DataContext";
 
-export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): ColumnDef<IOrder>[] => {
+export const OrderTableDef = (maxWeight: number, isCaseSensitive: boolean): ColumnDef<IOrder>[] => {
+  const { setSelectedOrder } = useContext(DataContext);
+
   return [
     {
       id: "select",
@@ -21,7 +25,13 @@ export const orderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
       cell: ({ row, table }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(value) => {
+            row.toggleSelected(!!value);
+
+            value
+              ? setSelectedOrder!((prev) => [...prev, { index: row.index, order: row.original }])
+              : setSelectedOrder!((prev) => prev.splice(row.index, 1));
+          }}
           disabled={!handleFilter(maxWeight, table, row)}
           aria-label="Select row"
         />

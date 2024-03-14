@@ -3,8 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { knapsack } from "@/functions/knapsack";
 import { toast } from "sonner";
-import type { RowSelection } from "@/types";
-import { useState, type Dispatch, type SetStateAction, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   flexRender,
   useReactTable,
@@ -17,7 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { ScrollArea } from "../ui/scroll-area";
 import { Button } from "../ui/button";
-import { orderTableDef } from "./OrderTableDef";
+import { OrderTableDef } from "./OrderTableDef";
 import { getRowSelection, handleFilter } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { Toggle } from "../ui/toggle";
@@ -26,12 +25,10 @@ import { DataContext } from "@/context/DataContext";
 
 type OrderKnapsackProps = {
   maxWeight: number;
-  selectedOrder: RowSelection[];
-  setSelectedOrder: Dispatch<SetStateAction<RowSelection[]>>;
 };
 
-export const OrderKnapsack = ({ maxWeight, selectedOrder, setSelectedOrder }: OrderKnapsackProps) => {
-  const { orders } = useContext(DataContext);
+export const OrderKnapsack = ({ maxWeight }: OrderKnapsackProps) => {
+  const { orders, selectedOrder, setSelectedOrder } = useContext(DataContext);
 
   const [isCaseSensitive, setIsCaseSensitive] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -39,7 +36,7 @@ export const OrderKnapsack = ({ maxWeight, selectedOrder, setSelectedOrder }: Or
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const columns = orderTableDef(maxWeight, isCaseSensitive);
+  const columns = OrderTableDef(maxWeight, isCaseSensitive);
 
   const table = useReactTable({
     data: orders!.data ?? [],
@@ -90,7 +87,7 @@ export const OrderKnapsack = ({ maxWeight, selectedOrder, setSelectedOrder }: Or
 
     table.setRowSelection(() => getRowSelection(order));
 
-    setSelectedOrder(order);
+    setSelectedOrder!(order);
     toast.success("Successfully picked orders using knapsack algorithm.");
   };
 

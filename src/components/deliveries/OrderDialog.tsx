@@ -30,27 +30,28 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
   const { handleUpdate, setLocation } = useContext(DataContext);
 
   const statusMutation = api.order.setDeliveryStatus.useMutation();
-  const updateOrder = (order : IOrder, status : DeliveryStatus) => {
+  const updateOrder = (order: IOrder, status: DeliveryStatus) => {
     statusMutation.mutate(
-      { orderId: order.id, status: status }, 
+      { orderId: order.id, status: status },
       {
         onSuccess: () => {
           handleUpdate!();
 
-          if (status === 'DELIVERED') {
-            setLocation!({ 
-              latitude: order.coordinates[0] ?? 0, 
-              longitude: order.coordinates[1] ?? 0
-            })
+          if (status === "DELIVERED") {
+            setLocation!({
+              latitude: order.coordinates[0] ?? 0,
+              longitude: order.coordinates[1] ?? 0,
+            });
           }
 
-          toast.success(status === 'DISPATCHED' ? 'Proceed to Delivery' : 'Order Delivered');
+          toast.success(status === "DISPATCHED" ? "Proceed to Delivery" : "Order Delivered");
         },
         onError: (error) => {
           toast.error(error.message);
-        }
-      })
-  }
+        },
+      },
+    );
+  };
 
   return (
     <Dialog>
@@ -71,9 +72,13 @@ export const OrderDialog = ({ order }: OrderDialogProps) => {
             </div>
 
             <DialogClose asChild>
-              { order.status === 'CONFIRMED' 
-              ? <Button onClick={() => updateOrder(order, 'DISPATCHED')} >START</Button>
-              : <Button onClick={() => updateOrder(order, 'DELIVERED')}  disabled={order.status === 'DELIVERED'}>Mark as delivered</Button>}
+              {order.status === "CONFIRMED" ? (
+                <Button onClick={() => updateOrder(order, "DISPATCHED")}>START</Button>
+              ) : (
+                <Button onClick={() => updateOrder(order, "DELIVERED")} disabled={order.status === "DELIVERED"}>
+                  Mark as delivered
+                </Button>
+              )}
             </DialogClose>
           </div>
 

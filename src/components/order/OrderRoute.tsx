@@ -1,7 +1,7 @@
 import { DataContext } from "@/context/DataContext";
 import { generateDeliveryRoute } from "@/functions/generateDeliveryRoute";
 import { formatMeter } from "@/lib/utils";
-import type { Coordinate, IOrder, RouteDetails } from "@/types";
+import type { Coordinate, RouteDetails } from "@/types";
 import { type Session } from "next-auth";
 import { useContext, useEffect, useState } from "react";
 import { Mapbox } from "../dashboard/Mapbox";
@@ -11,17 +11,16 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "../ui/table"
 type OrderRouteProps = {
   location: Coordinate;
   session: Session;
-  selectedOrder: IOrder[];
 };
 
-export const OrderRoute = ({ location, session, selectedOrder, }: OrderRouteProps) => {
+export const OrderRoute = ({ location, session }: OrderRouteProps) => {
   const [routes, setRoutes] = useState<RouteDetails[]>([]);
 
-  const { route,  setRoute, setRouteDetails } = useContext(DataContext);
+  const { route,  setRoute, setRouteDetails, selectedOrder } = useContext(DataContext);
 
   useEffect(() => {
     const fetchRoutes = async () => {
-      const paths = await generateDeliveryRoute(location, selectedOrder);
+      const paths = await generateDeliveryRoute(location, selectedOrder!.map((order) => order.order));
       setRoutes(paths);
     };
 

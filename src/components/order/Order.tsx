@@ -3,7 +3,7 @@
 import { DataContext } from "@/context/DataContext";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import type { Coordinate, IOrder, RowSelection } from "@/types";
+import type { Coordinate, IOrder } from "@/types";
 import { type Session } from "next-auth";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,23 +23,21 @@ type OrderProps = {
 
 export const Order = ({ deliveries, session, location }: OrderProps) => {
   const [page, setPage] = useState(1);
-  const [selectedOrder, setSelectedOrder] = useState<RowSelection[]>([]);
 
-  const { orders, handleUpdate } = useContext(DataContext);
+  const { orders, handleUpdate, selectedOrder, setSelectedOrder } = useContext(DataContext);
 
   useEffect(() => {
     if (deliveries?.length) {
-      setSelectedOrder(deliveries.map((order) => ({ order })));
+      setSelectedOrder!(deliveries.map((order) => ({ order })));
     }
 
     setPage(!deliveries?.length ? 1 : 2);
-  }, [deliveries]);
+  }, [deliveries, setSelectedOrder]);
 
   const handleVisibilityEvent = (open: boolean) => {
     if (!open) {
       setPage(!deliveries?.length ? 1 : 2);
-      setSelectedOrder([]);
-
+      setSelectedOrder!([]);
     }
   };
 
@@ -47,7 +45,7 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
 
   const onConfirm = async () => {
     pendingDelivery.mutate(
-      { orderIds: selectedOrder.map((order) => order.order.id)}, 
+      { orderIds: selectedOrder!.map((order) => order.order.id) },
       {
         onSuccess: () => {
           handleUpdate!();
@@ -56,7 +54,7 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
         onError: (error) => {
           toast.error(error.message);
         },
-      }
+      },
     );
   };
 
@@ -85,21 +83,9 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
           </div>
         </div>
 
-        {page === 1 && orders ? (
-          <OrderKnapsack
-            maxWeight={session.user.maxWeight}
-            selectedOrder={selectedOrder}
-            setSelectedOrder={setSelectedOrder}
-          />
-        ) : null}
+        {page === 1 && orders ? <OrderKnapsack maxWeight={session.user.maxWeight} /> : null}
 
-        {page === 2 ? (
-          <OrderRoute
-            location={location}
-            session={session}
-            selectedOrder={selectedOrder.map((order) => order.order)}
-          />
-        ) : null}
+        {page === 2 ? <OrderRoute location={location} session={session} /> : null}
 
         <OrderFooter page={page} hasLength={!deliveries?.length} setPage={setPage} onConfirm={onConfirm} />
       </DialogContent>
