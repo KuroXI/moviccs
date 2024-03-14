@@ -1,23 +1,23 @@
-import { z } from "zod";
+import { warehouseCoordinate } from "@/context/DataContext";
 import { generateCoordinates } from "@/functions/generateCoordinates";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
-import { type Coordinate } from "@/types";
 import { generateItems } from "@/functions/generateItems";
 import { getDistance } from "@/functions/getDistance";
 import { getLocation } from "@/functions/getLocation";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { type DeliveryStatus } from "@prisma/client";
+import { z } from "zod";
 
 export const orderRouter = createTRPCRouter({
   create: publicProcedure
-    .input(z.object({ count: z.number(), location: z.custom<Coordinate>() }))
+    .input(z.object({ count: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const coordinates = generateCoordinates({ count: input.count, location: input.location });
+      const coordinates = generateCoordinates({ count: input.count, location: warehouseCoordinate });
 
       Promise.all(coordinates)
         .then(async (coordinates) => {
           for (const { latitude, longitude } of coordinates) {
             const { address } = await getLocation(latitude, longitude);
-            const { distance } = await getDistance(input.location, { latitude, longitude });
+            const { distance } = await getDistance(warehouseCoordinate, { latitude, longitude });
 
             const createOrder = await ctx.db.order.create({
               data: {
@@ -48,20 +48,6 @@ export const orderRouter = createTRPCRouter({
       where: {
         status: "PLACED",
         handlerId: null,
-      },
-    });
-  }),
-
-  getDeliveryOrder: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.order.findMany({
-      include: {
-        handler: true,
-        items: true,
-        pendingDelivery: true,
-      },
-      where: {
-        status: "PLACED",
-        handlerId: ctx.session.user.id,
       },
     });
   }),
@@ -105,6 +91,14 @@ export const orderRouter = createTRPCRouter({
     });
   }),
 
+  deletePendingDelivery: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.pendingDelivery.delete({
+      where: {
+        handlerId: ctx.session.user.id,
+      },
+    });
+  }),
+
   setDeliveryStatus: protectedProcedure
     .input(z.object({ orderId: z.string(), status: z.custom<DeliveryStatus>() }))
     .mutation(async ({ ctx, input }) => {
@@ -117,4 +111,16 @@ export const orderRouter = createTRPCRouter({
         },
       });
     }),
+
+  getHistoryDeliveries: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.order.findMany({
+      include: {
+        items: true,
+        handler: true,
+      },
+      where: {
+        handlerId: ctx.session.user.id,
+      },
+    })
+  }),
 });

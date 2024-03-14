@@ -18,14 +18,14 @@ type DashboardClientProps = {
 };
 
 export const DashboardClient = ({ session }: DashboardClientProps) => {
-  const { route, routeDetails, location } = useContext(DataContext);
+  const { route, location } = useContext(DataContext);
 
   const deliveries = api.order.getPendingDeliveries.useQuery();
 
   const orderMutation = api.order.create.useMutation();
   const generate = () => {
     orderMutation.mutate(
-      { count: 20, location: location! },
+      { count: 20 },
       {
         onSuccess: () => {
           toast.success("Order generated");
@@ -36,24 +36,6 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
       },
     );
   };
-
-  // const simulateDelivery = async () => {
-  //   for (const order of route!.orderRoute) {
-  //     for (const route of order.routeDescription.route) {
-  //       setLocation({
-  //         latitude: route[1]!,
-  //         longitude: route[0]!,
-  //       }); 
-
-  //       /**
-  //        * 800 - More realistic simulation
-  //        * 200  - Faster simulation (for presentation purposes)
-  //        * 100  - Fastest simulation (for testing purposes)
-  //        */
-  //       await new Promise((resolve) => setTimeout(resolve, 1000));
-  //     }
-  //   }
-  // };
 
   const [weight, setWeight] = useState(session.user.maxWeight);
   const userMaxWeightMutation = api.user.setMaxWeight.useMutation();
@@ -83,9 +65,10 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
       <div className="row-span-1 flex flex-col gap-5 p-3">
         <div className="flex items-center justify-between">
           <Button onClick={generate}>Generate Order</Button>
+          <Order deliveries={deliveries.data?.orders} session={session} location={location!} />
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">Set Max Weight</Button>
+              <Button>Set Max Weight</Button>
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="grid gap-4">
@@ -102,13 +85,9 @@ export const DashboardClient = ({ session }: DashboardClientProps) => {
               </div>
             </PopoverContent>
           </Popover>
-          <Order deliveries={deliveries.data?.orders} session={session} location={location!} />
-          <Button disabled={route === null}>
-            Simulate Delivery
-          </Button>
         </div>
 
-        <DeliveriesTable route={routeDetails} />
+        <DeliveriesTable />
       </div>
     </main>
   );
