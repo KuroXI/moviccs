@@ -1,6 +1,5 @@
 import { getDistance } from "./getDistance";
 import type { Coordinate, IOrder, OrderRoute, RouteDetails } from "@/types";
-import { selectionSort } from "./selectionSort";
 
 export const generateDeliveryRoute = async (startLocation: Coordinate, orders: IOrder[]) => {
   const pointsDistance: Map<string, Map<string, OrderRoute>> = await generatePointsDistance(startLocation, orders);
@@ -59,7 +58,9 @@ export const generateDeliveryRoute = async (startLocation: Coordinate, orders: I
     });
   });
 
-  return selectionSort(calculatedRoutes, "routeDistance", false);
+  calculatedRoutes.sort((a, b) => a.routeDistance - b.routeDistance);
+
+  return calculatedRoutes;
 };
 
 export const generatePointsDistance = async (startLocation: Coordinate, orders: IOrder[]) => {
