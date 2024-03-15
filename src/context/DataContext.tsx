@@ -1,6 +1,7 @@
 "use client";
 
 import { generateDeliveryRoute } from "@/functions/generateDeliveryRoute";
+import { warehouseCoordinate } from "@/lib/constant";
 import { api } from "@/trpc/react";
 import type { AvailableOrder, Coordinate, IOrder, OrderRoute, RouteDetails, RowSelection } from "@/types";
 import { createContext, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
@@ -20,11 +21,6 @@ export interface DataInterface {
 }
 
 export const DataContext = createContext<Partial<DataInterface>>({});
-
-export const warehouseCoordinate = {
-  latitude: 14.662039,
-  longitude: 121.058082,
-};
 
 const DataProvider = ({ children }: { children: ReactNode }) => {
   const [selectedOrder, setSelectedOrder] = useState<RowSelection[]>([]);

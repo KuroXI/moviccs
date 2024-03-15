@@ -12,11 +12,11 @@ export default async function Home() {
   return (
     <>
       <Navbar session={session} />
-      <MaxWidthWrapper>
-        <DataProvider>
+      <DataProvider>
+        <MaxWidthWrapper>
           <DashboardClient session={session} />
-        </DataProvider> 
-      </MaxWidthWrapper>
+        </MaxWidthWrapper>
+      </DataProvider>
     </>
   );
 }

@@ -1,8 +1,8 @@
-import { warehouseCoordinate } from "@/context/DataContext";
 import { generateCoordinates } from "@/functions/generateCoordinates";
 import { generateItems } from "@/functions/generateItems";
 import { getDistance } from "@/functions/getDistance";
 import { getLocation } from "@/functions/getLocation";
+import { warehouseCoordinate } from "@/lib/constant";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { type DeliveryStatus } from "@prisma/client";
 import { z } from "zod";
