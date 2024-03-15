@@ -1,7 +1,6 @@
 import { stringMatching } from "@/functions/stringMatching";
 import { handleHighlightedText } from "@/lib/utils";
 import { TableCell, TableRow } from "../ui/table";
-import Link from "next/link";
 
 type HistoryRowProps = {
   delivery: {
@@ -23,9 +22,7 @@ export const HistoryRow = ({ delivery, search, isCaseSensitive }: HistoryRowProp
       <TableCell>{delivery.orderId}</TableCell>
       <TableCell>
         {splittedAddress.map((word, index) => {
-          const isMatch = isCaseSensitive
-            ? word === search
-            : word.toLowerCase() === search?.toLowerCase();
+          const isMatch = isCaseSensitive ? word === search : word.toLowerCase() === search?.toLowerCase();
           return isMatch ? (
             <span className="bg-yellow-400 text-background" key={`${word}-${index}`}>
               {word}
@@ -35,9 +32,7 @@ export const HistoryRow = ({ delivery, search, isCaseSensitive }: HistoryRowProp
           );
         })}
       </TableCell>
-      <TableCell className="hover:cursor-pointer hover:underline">
-        <Link href={`/track/${delivery.id}`}>{delivery.id}</Link>
-      </TableCell>
+      <TableCell className="hover:cursor-pointer hover:underline">{delivery.id}</TableCell>
       <TableCell className="text-right">{delivery.updatedAt.toLocaleString()}</TableCell>
     </TableRow>
   );

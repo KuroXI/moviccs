@@ -15,7 +15,7 @@ export const OrderFooter = ({ page, hasLength, setPage, onConfirm }: OrderFooter
       <Button size="sm" variant="ghost" disabled={page <= (hasLength ? 1 : 2)} onClick={() => setPage(page - 1)}>
         Back
       </Button>
-      {page == 3 ? (
+      {page == 2 ? (
         <DialogClose onClick={onConfirm} asChild>
           <Button size="sm">Confirm</Button>
         </DialogClose>

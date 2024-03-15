@@ -16,6 +16,7 @@ import { Skeleton } from "../ui/skeleton";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { Switch } from "../ui/switch";
+import { NavigationLinks } from "./NavigationLinks";
 
 type NavbarProps = {
   session: Session;
@@ -28,6 +29,9 @@ export const Navbar = ({ session }: NavbarProps) => {
     <header className="sticky top-0 z-50 border-b backdrop-blur-lg">
       <MaxWidthWrapper className="flex items-center justify-between px-5 py-2">
         <h1>Moviccs</h1>
+        <div className="flex gap-10">
+          <NavigationLinks />
+        </div>
         {session ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
