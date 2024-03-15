@@ -9,7 +9,6 @@ import { selectionSort } from "@/functions/selectionSort";
 import { Input } from "../ui/input";
 import { Toggle } from "../ui/toggle";
 import { HistoryRow } from "./HistoryRow";
-import Link from "next/link";
 
 export const HistoryClient = () => {
   const { history, setHistory, isDesc, setIsDesc } = useContext(HistoryContext);
@@ -37,7 +36,7 @@ export const HistoryClient = () => {
     <div className="pb-20">
       <div className="flex items-center gap-2 px-2 py-10">
         <Input
-          className="w-1/3"
+          className="w-1/4"
           placeholder="Search address"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -76,22 +75,36 @@ export const HistoryClient = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {typeof filteredHistory !== "undefined"
-            ? search.length > 0
-              ? filteredHistory.map((delivery) => (
+          {typeof filteredHistory !== "undefined" ? (
+            search.length > 0 ? (
+              filteredHistory.length > 0 ? (
+                filteredHistory.map((delivery) => (
                   <HistoryRow key={delivery.id} delivery={delivery} search={search} isCaseSensitive={isCaseSensitive} />
                 ))
-              : history?.map((delivery) => (
-                  <TableRow key={delivery.id}>
-                    <TableCell>{delivery.orderId}</TableCell>
-                    <TableCell>{delivery.address}</TableCell>
-                    <TableCell className="hover:cursor-pointer hover:underline">
-                      <Link href={`/track/${delivery.id}`}>{delivery.id}</Link>
-                    </TableCell>
-                    <TableCell className="text-right">{delivery.updatedAt.toLocaleString()}</TableCell>
-                  </TableRow>
-                ))
-            : null}
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    Address containing &quot;{search}&quot; not found
+                  </TableCell>
+                </TableRow>
+              )
+            ) : (
+              history?.map((delivery) => (
+                <TableRow key={delivery.id}>
+                  <TableCell>{delivery.orderId}</TableCell>
+                  <TableCell>{delivery.address}</TableCell>
+                  <TableCell className="hover:cursor-pointer hover:underline">{delivery.id}</TableCell>
+                  <TableCell className="text-right">{delivery.updatedAt.toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            )
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center">
+                No history found
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
