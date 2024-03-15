@@ -30,7 +30,7 @@ export const OrderTableDef = (maxWeight: number, isCaseSensitive: boolean): Colu
 
             value
               ? setSelectedOrder!((prev) => [...prev, { index: row.index, order: row.original }])
-              : setSelectedOrder!((prev) => prev.splice(row.index, 1));
+              : setSelectedOrder!((prev) => prev.filter((order) => order.index !== row.index));
           }}
           disabled={!handleFilter(maxWeight, table, row)}
           aria-label="Select row"

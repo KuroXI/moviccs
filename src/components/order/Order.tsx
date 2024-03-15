@@ -65,7 +65,7 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
       </DialogTrigger>
 
       <DialogContent className="w-full max-w-screen-lg">
-        <div className="pointer-events-none flex items-center justify-between whitespace-nowrap px-60 py-10">
+        <div className="pointer-events-none flex items-center justify-between whitespace-nowrap px-52 py-10">
           <div className="flex items-center justify-center">
             <Badge className={page > 0 ? "bg-green-500" : ""}>Order</Badge>
           </div>
