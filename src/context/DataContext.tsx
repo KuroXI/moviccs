@@ -41,9 +41,7 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
       handleUpdate();
       setLocation(warehouseCoordinate);
     },
-    onError: (error) => {
-      toast.error(error.message);
-    },
+    onError: (error) => toast.error(error.message),
   });
 
   const handleUpdate = () => {
@@ -83,12 +81,8 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
 
   if (Boolean(pendingDeliveries.data) && routeDetails === undefined) {
     generateDeliveryRoute(location, pendingDeliveries.data?.orders as IOrder[])
-      .then((route) => {
-        setRouteDetails(route[0]);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      .then((route) => setRouteDetails(route[0]))
+      .catch((error: Error) => toast.error(error.message));
   }
 
   return (
