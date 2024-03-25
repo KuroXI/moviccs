@@ -18,8 +18,6 @@ type MapboxProps = {
 export const Mapbox = ({ className, location, session, orderRoute }: MapboxProps) => {
   const { theme } = useTheme();
 
-  console.log('MapBox OrderRoute', orderRoute)
-
   return (
     <div className={cn(className)}>
       <ReactMapGL

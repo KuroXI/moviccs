@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { ScrollArea } from "../ui/scroll-area";
 import { Button } from "../ui/button";
-import { OrderTableDef } from "./OrderTableDef";
+import { orderTableDef } from "./OrderTableDef";
 import { getRowSelection, handleFilter } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { Toggle } from "../ui/toggle";
@@ -36,7 +36,7 @@ export const OrderKnapsack = ({ maxWeight }: OrderKnapsackProps) => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const columns = OrderTableDef(maxWeight, isCaseSensitive);
+  const columns = orderTableDef(maxWeight, isCaseSensitive);
 
   const table = useReactTable({
     data: orders!.data ?? [],
@@ -63,6 +63,15 @@ export const OrderKnapsack = ({ maxWeight }: OrderKnapsackProps) => {
       ],
     },
   });
+
+  useEffect(() => {
+    if (table.getSelectedRowModel().rows.length === 0) return;
+
+    setSelectedOrder!(table.getSelectedRowModel().rows.map((row) => ({
+      index: row.index,
+      order: row.original,
+    })));
+  }, [table, setSelectedOrder]);
 
   useEffect(() => {
     if (!selectedOrder) return;

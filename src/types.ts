@@ -62,7 +62,7 @@ export type ImageResponse = {
 };
 
 export type RowSelection = {
-  index?: number;
+  index: number;
   order: IOrder;
 };
 
