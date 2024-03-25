@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import { Mapbox } from "../dashboard/Mapbox";
 import { ScrollArea } from "../ui/scroll-area";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "../ui/table";
+import { toast } from "sonner";
 
 type OrderRouteProps = {
   location: Coordinate;
@@ -21,6 +22,7 @@ export const OrderRoute = ({ location, session }: OrderRouteProps) => {
   useEffect(() => {
     const fetchRoutes = async () => {
       const paths = await generateDeliveryRoute(location, selectedOrder!.map((order) => order.order));
+      toast.success('Delivery Routes generated! 🚚')
       setRoutes(paths);
     };
 

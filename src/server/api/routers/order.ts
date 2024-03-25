@@ -49,6 +49,10 @@ export const orderRouter = createTRPCRouter({
         status: "PLACED",
         handlerId: null,
       },
+      orderBy: {
+        createdAt: "asc",
+      },
+      take: 20
     });
   }),
 
