@@ -4,7 +4,7 @@ import { generateDeliveryRoute } from "@/functions/generateDeliveryRoute";
 import { warehouseCoordinate } from "@/lib/constant";
 import { api } from "@/trpc/react";
 import type { AvailableOrder, Coordinate, IOrder, OrderRoute, RouteDetails, RowSelection } from "@/types";
-import { createContext, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { createContext, useState, type Dispatch, type ReactNode, type SetStateAction, useEffect } from "react";
 import { toast } from "sonner";
 
 export interface DataInterface {
@@ -75,11 +75,13 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
       .catch((error: Error) => toast.error(error.message));
   };
 
-  if (Boolean(pendingDeliveries.data) && routeDetails === undefined) {
-    generateDeliveryRoute(location, pendingDeliveries.data?.orders as IOrder[])
-      .then((route) => setRouteDetails(route[0]))
-      .catch((error: Error) => toast.error(error.message));
-  }
+  useEffect(() => {
+    if (Boolean(pendingDeliveries.data) && routeDetails === undefined) {
+      generateDeliveryRoute(location, pendingDeliveries.data?.orders as IOrder[])
+        .then((route) => setRouteDetails(route[0]))
+        .catch((error: Error) => toast.error(error.message));
+    }
+  }, [location, pendingDeliveries.data, routeDetails]);
 
   return (
     <DataContext.Provider

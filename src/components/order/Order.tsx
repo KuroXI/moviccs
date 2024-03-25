@@ -28,7 +28,7 @@ export const Order = ({ deliveries, session, location }: OrderProps) => {
 
   useEffect(() => {
     if (deliveries?.length) {
-      setSelectedOrder!(deliveries.map((order) => ({ order })));
+      setSelectedOrder!(deliveries.map((order) => ({ order, index: -1 })));
     }
 
     setPage(!deliveries?.length ? 1 : 2);

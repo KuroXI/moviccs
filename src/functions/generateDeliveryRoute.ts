@@ -59,7 +59,7 @@ export const generateDeliveryRoute = async (startLocation: Coordinate, orders: I
     });
   });
 
-  return selectionSort(calculatedRoutes, "routeDistance", false);
+  return selectionSort(calculatedRoutes, "routeDistance");
 };
 
 export const generatePointsDistance = async (startLocation: Coordinate, orders: IOrder[]) => {

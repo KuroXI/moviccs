@@ -16,7 +16,7 @@ export const HistoryClient = () => {
 
   const sort = (key: "orderId" | "id" | "address" | "updatedAt") => {
     setIsDesc!(isDesc === undefined ? true : !isDesc);
-    setHistory!(selectionSort(history!, key, !!isDesc));
+    setHistory!(selectionSort(history!, key, !isDesc));
     forceUpdate();
   };
 
