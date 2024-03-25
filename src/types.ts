@@ -82,3 +82,9 @@ export type HistoryDeliveries = {
   address: string;
   updatedAt: Date;
 }[];
+
+export type knapsackOutput = {
+  orders: RowSelection[];
+  totalWeight: number;
+  ratio: number;
+};
